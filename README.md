@@ -362,9 +362,12 @@ Rationale: Destroying the Locked contract will make all team members lose their 
 Expected behavior:
 •       All remaining tokens of the contract (including those which weren’t unlocked by team members) get transferred to the owner, thus increasing his/her token balance.
 •       Token balance of Locked instance is zero. • The contract gets destroyed (code data of account is set to 0x0).
+
 ## Test Environments
+
 The TOKEN ICO contracts were tested on different networks.
 1.     Deployment on the Rinkeby test network.
+
 •       The testing was carried out by manually calling the contract functions via MyEtherWallet and MetaMask from different accounts.
 •       Analysis of transaction history and contract state were done via MyEtherWallet and Etherscan.
 2.     Deployment on a local machine.
