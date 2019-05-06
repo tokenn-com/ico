@@ -11,7 +11,6 @@ This crowdsale smart contract builds on (forked) triple-audided crowdsale smart 
 * TOKENpresale
 * TOKEN
 * Locked
-* Variables
 
 ## Addresses and wallets
 
@@ -20,9 +19,9 @@ Required wallets include
 * _wallet
 * Airdropper owner
 * Whitelist owner
-* TOKENpresale owner
+* TokenSale owner
 * TOKEN owner
-Owned by TOKENpresale
+Owned by TokenSale
 * Locked
 
 ## Parameters
