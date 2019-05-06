@@ -6,13 +6,14 @@ Updates and housekeeping of out of date code
 
 ## Smart contracts
  
-Airdropper
-Whitelist
-TOKENpresale
-TOKEN
-Locked
-Variables
-Wallets
+* Airdropper
+* Whitelist
+** TOKENpresale
+* TOKEN
+* Locked
+* Variables
+
+## Wallets
 
 Wallet
 Address
@@ -92,7 +93,7 @@ Whitelist
  
 The whitelist contract will contain the (mutable) addresses of investors who are allowed to buy tokens during the presale period. Whitelisted account addresses are stored in the contract instance.
 
-Features
+### Features
 
 Ownable
 The owner if the Whitelist instance can transfer the ownership at any time to any other account.
@@ -104,7 +105,8 @@ Lifecycle
 Whitelist’s behavior is invariant with respect to time.
 Constraints
 Only the owner is allowed to add or remove addresses. There are no time related restrictions on adding or removing entries, but the TOKENpresale instance will read this set only during the crowdsale period.
-TOKENpresale
+
+## TOKENpresale
  
 When TOKENpresale is deployed it creates a new TOKEN instance, thus becoming its owner. 
 
