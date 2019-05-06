@@ -8,7 +8,7 @@ This crowdsale smart contract builds on (forked) triple-audided crowdsale smart 
  
 * Airdropper
 * Whitelist
-* TOKENpresale
+* TokenSale
 * TOKEN
 * Locked
 
