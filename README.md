@@ -1,61 +1,48 @@
 # Tokenn Crowdsale Smart Contract
  
-This crowdsale smart contract builds on a forked triple audided crowdsale smart contract development by Odem. Additions include:
-The token's Uniswap market is capitalized with tokens and ether on crowdsale finalization and liquidity tokens vested;
-Updates and housekeeping of out of date code
+This crowdsale smart contract builds on (forked) triple-audided crowdsale smart contract development by Odem. Additions include:
+* The token's Uniswap market is capitalized with tokens and ETH on crowdsale finalization and liquidity tokens non-vested;
+* Updates and housekeeping of out of date code
 
 ## Smart contracts
  
 * Airdropper
 * Whitelist
-** TOKENpresale
+* TOKENpresale
 * TOKEN
 * Locked
 * Variables
 
-## Wallets
+## Addresses and wallets
 
-Wallet
-Address
-_reward
-0x123Be8890F375398d17137Da322d2154C07259A2
-_wallet
-0x5Aa9E0727b57cF9aC354626A3Ea137317a30E636
-Airdropper owner
-0xf964707c8fb25daf61aeeef162a3816c2e8f25dd
-Whitelist owner
-0x5Aa9E0727b57cF9aC354626A3Ea137317a30E636
-TOKENpresale owner
-0xf964707c8fb25daf61aeeef162a3816c2e8f25dd
-TOKEN owner
+Required wallets include
+* _reward
+* _wallet
+* Airdropper owner
+* Whitelist owner
+* TOKENpresale owner
+* TOKEN owner
 Owned by TOKENpresale
-Locked
-0x5Aa9E0727b57cF9aC354626A3Ea137317a30E636
+* Locked
 
-Starting rate
+## Parameters
 
-(tokens per wei) rate
-0.00000000005
+### Starting rate:
 
-Timings
+tokens per wei rate
 
-Event
-Date
-Deploy date
-ASAP
-Crowdsale start: 22 days after deploy date
-Crowdsale end: March 10th, 2019
-Finalization date: N/A
-Non-vest lock in time (days after deployment): 365
-Non-vest kill before (days after deployment): 500
+### Timings
 
-TOKEN allocations
-Detailed
+* Deploy date
+* Crowdsale start
+* Crowdsale end
+* Finalization date
+* Non-vest lock in time (days after deployment)
+* Non-vest kill before (days after deployment)
 
-Allocation
-%
-TOKEN
-presale
+### Token allocations
+
+Presale
 15%
 7,500,000
 ICO *
@@ -70,7 +57,7 @@ Exchanges listings *
 Team *
 10%
 5,000,000
-ACT Foundation *
+Other
 5%
 2,500,000
 dExperts
@@ -89,26 +76,28 @@ TOTAL
 An airdropper contract completes all individual transfers within one combined transaction reducing fees associated with the distribution. Airdropper never holds tokens. Instead it calls ERC20's transferFrom to transfer tokens directly from the reward wallet to the recipients. Recipients can see that their tokens came directly from this address, so they can verify that they received their rewards in good order. The address is recorded in the TOKEN ICO repository. The contract can be tested on the main network without interfering with the allocation of reward TOKEN, and without the need to deploy a new instance after testing.
 
 Airdropper also has a method to self-destruct, which is called as soon as tokens have been distributed to all recipients. This prevents it from being used as an attack vector in any future zero-day exploits, and takes some load off the Ethereum network (it's important to be a good neighbour).
-Whitelist
+
+## Whitelist
  
 The whitelist contract will contain the (mutable) addresses of investors who are allowed to buy tokens during the presale period. Whitelisted account addresses are stored in the contract instance.
 
 ### Features
 
-Ownable
-The owner if the Whitelist instance can transfer the ownership at any time to any other account.
-Mutability
-Addresses can be added to or removed from a Whitelist instance by its owner at any time.
+Ownable - The owner if the Whitelist instance can transfer the ownership at any time to any other account.
+Mutability - Addresses can be added to or removed from a Whitelist instance by its owner at any time.
+
 Owner
-Only the Whitelist instance’s owner is allowed to add/remove addresses to/from the whitelist. Initially, this will be the account who deployed the Whitelist instance, but ownership can be transferred later by the current owner to any other account. The owner does not need to be the same as of the TOKENpresale instance.
+Only the Whitelist instance’s owner is allowed to add/remove addresses to/from the whitelist. Initially, this will be the account who deployed the Whitelist instance, but ownership can be transferred later by the current owner to any other account. The owner does not need to be the same as of the TokenSale instance.
+
 Lifecycle
 Whitelist’s behavior is invariant with respect to time.
+
 Constraints
 Only the owner is allowed to add or remove addresses. There are no time related restrictions on adding or removing entries, but the TOKENpresale instance will read this set only during the crowdsale period.
 
-## TOKENpresale
+## TokenSale
  
-When TOKENpresale is deployed it creates a new TOKEN instance, thus becoming its owner. 
+When TokenSale is deployed it creates a new Token instance, thus becoming its owner. 
 
 The following token related constants are defined:
  
@@ -142,7 +131,6 @@ TOTAL_TOKENS_FOR_CROWDSALE =  PRE_CROWDSALE_CAP  +  PUBLIC_CROWDSALE_CAP
  
 8million ( 8000000e18 (~  8M×10 18  tokens))
 
-
 Total supply
  
 TOTAL_TOKENS_SUPPLY  == token.totalSupply
@@ -152,13 +140,15 @@ TOTAL_TOKENS_SUPPLY  >=  REWARD_SHARE +  VESTED_TEAM_ADVISORS_SHARE +  NON_VESTE
  
 Early buyers
 Maximum amount of tokens a contributor can buy during the crowdsale. PERSONAL_CAP = 2.5million (e.g. 2500000e18 (~ 2.5M ×10 18  tokens))
-Features
-Ownable
-The owner of an TOKENpresale instance can transfer the ownership at any time to any other account.
-Pausable
-During the crowdsale (i.e. from start till end) the sale of tokens to investors can be halted and continued by the TOKENpresale instance’s owner. Pausing in other periods is possible but without any effects.
+
+### Features
+
+Ownable - The owner of an TOKENpresale instance can transfer the ownership at any time to any other account.
+Pausable - During the crowdsale (i.e. from start till end) the sale of tokens to investors can be halted and continued by the TOKENpresale instance’s owner. Pausing in other periods is possible but without any effects.
+
 Finalizable
 After the end of crowdsale, the TOKENpresale  instance has to be finalized to enable the free trade/transfer of tokens. This can be done solely by the owner, only after the crowdsale has ended, and only once.
+
 Accounts/Roles
 Owner - the owner of an TOKENpresale instance is the account who created/deployed it. The owner can:
 transfer ownership at any time to any other account
@@ -170,36 +160,45 @@ finalize the contract instance after the crowdsale has ended (and only if it was
 Wallet
 Crowdsale funds
 This wallet will hold the crowdsale funds received during the crowdsale. The wallet address must be given when creating a TOKENpresale instance and cannot be changed afterwards.
+
 Tokens
 When the crowdsale is finalized, NON_VESTED_TEAM_ADVISORS_SHARE, and  COMPANY_SHARE will be minted for the benefit of the _wallet account. In our case both values are 0.
+
 Reward Wallet
 When the crowdsale is finalized, a fixed amount of tokens from the rewards campaign (see Constants: sol: REWARD_SHARE) will be minted for the benefit of this account.
-DExperts
+D
+Experts
 Before the crowdsale starts, the TOKENpresale’s instance owner can mint tokens for the benefit of dExpert’s accounts.  This won’t be possible from the crowdsale’s start time on. The total amount of pre-crowdsale minted tokens is capped (see Constants:  PRE_CROWDSALE_CAP).
+
 Auction Contributors
 Pool account address will be whitelisted by the Whitelist’s instance owner if they are successful in the auction. Whitelisted auction winners  are  able  to  purchase  tokens  during  the  crowdsale  period,  but  only  if  the  crowdsale wasn’t paused by the TOKENpresale instance’s owner.
 
 During the crowdsale start, the amount of tokens a single investor can buy is capped (see Constants:  PERSONAL_CAP), which is independent of if the contributor already received tokens due to pre-crowdsale minting.
 
 The total amount of tokens that can be bought during crowdsale is capped (see Constants: TOTAL_TOKENS_FOR_CROWDSALE). If the last contributor tries to buy more tokens than are available, he/she will get the remaining ones (with respect to the cap) and his/her address along with the overpaid amount of ether will be stored for later refund. These refunds will be paid out manually.
-Token
-TOKEN is an ERC20 compliant token contract. TOKENpresale will become the TOKEN instance’s owner, therefore, the following sections refer to an TOKEN instance created and owned by an existing TOKENpresale instance. Transferring the ownership of the TOKENpresale instance doesn’t affect the ownership of its assigned TOKEN instance (it will remain the crowdsale contract instance).
+
+## Token
+
+TOKEN is an ERC20 compliant token contract. TokenSale will become the TOKEN instance’s owner, therefore, the following sections refer to an TOKEN instance created and owned by an existing TokenSale instance. Transferring the ownership of the TokenSale instance doesn’t affect the ownership of its assigned TOKEN instance (it will remain the crowdsale contract instance).
+
 Lifecycle
-During initialization, i.e. deployment, of a TOKENpresale instance, a paused TOKEN instance will be created, and the following state variables will be stored:
-start time of crowdsale period
-end time of crowdsale period
-wallet address
-reward Wallet addresses
-address of prior to this created Whitelist instance
-address of newly created TOKEN instance
-(tokens per wei) rate
-Features
-Ownable
-The TOKEN contract is Ownable, thus exposing a method to its owner for transferring the ownership to a new address. But since TOKENpresale is its owner and doesn’t use this feature, it will stay its TOKEN’s owner forever.
-Pausable
-The trade of tokens, i.e. transfer from one account to another, of tokens can be halted and continued by its owner (see Lifecycle).
-Mintable
-The TOKEN instance’s owner is able to mint some tokens, i.e. create new tokens and increase any account’s token balance.
+During initialization, i.e. deployment, of a TokenSale instance, a paused TOKEN instance will be created, and the following state variables will be stored:
+* start time of crowdsale period
+* end time of crowdsale period
+* wallet address
+* reward Wallet addresses
+* address of prior to this created Whitelist instance
+* address of newly created TOKEN instance
+* (tokens per wei) rate
+* address of newly created Uniswap Market
+
+### Features
+
+Ownable - The TOKEN contract is Ownable, thus exposing a method to its owner for transferring the ownership to a new address. But since TOKENpresale is its owner and doesn’t use this feature, it will stay its TOKEN’s owner forever.
+Pausable - The trade of tokens, i.e. transfer from one account to another, of tokens can be halted and continued by its owner (see Lifecycle).
+
+Mintable - The TOKEN instance’s owner is able to mint some tokens, i.e. create new tokens and increase any account’s token balance.
+
 Accounts/Roles
 Owner
 The TOKENpresale instance will own the TOKEN instance.
@@ -210,26 +209,37 @@ The TOKEN contract by itself doesn’t impose any restrictions to which accounts
 3.  The predefined wallet and reward accounts will get some tokens at the end of crowdsale period.
 4.  Tokens allocated by the Locked instance owner, after its 365 retention period has ended. The token distribution defines their uses as ICO, new user aquisition, exchanges listings, team, and ACT Foundation contributors.
 5.  Being the receiver of a freely tradable ERC20 compliant token transfer after the crowdsale has ended.
+
 Lifecycle
+
 Paused
 When an TOKEN instance is created its state will be set paused, therefore, token minting is possible but trade/transfer is not.
+
 Unpaused
 After the crowdsale period has ended, the TOKENpresale instance has to be finalized manually (or by any off-chain automatism). The TOKENpresale instance will unpause its TOKEN instance making tokens transferable from token holders to any Ethereum accounts. TOKENpresale ensures that minting of tokens is not possible anymore.
+
 Constraints
 The TOKEN by itself doesn’t impose any restrictions on when it is paused/unpaused or beneficiaries of minted or transferred tokens as these are controlled by the owning TOKENpresale instance.
+
 Pause/Unpause
 The pause/unpause state can be changed by the owning TOKENpresale instance only.
+
 Minting
 The amount and receivers of minted tokens is controlled by the owning TOKENpresale instance only.
+
 Total Supply
 The  maximum  total  supply  of  tokens  is  controlled  by  the  owning  TOKENpresale  instance’s  minting restrictions  and  won’t  exceed  TOTAL_TOKENS_FOR_CROWDSALE (see  TOKENpresale  Constants)  before crowdsale finalization. After  crowdsale  finalization  the  total  amount  of  tokens  is  fixed  to  TOTAL_TOKENS_SUPPLY  (see Crowdsale Constants).
+
 End of Crowdsale
 The crowdsale ends if either the crowdsale period elapsed or all available tokens were purchased. In the latter case the crowdsale will end before its predefined end time.
 If the total supplied tokens is below a predefined cap (see Constants:    TOTAL_TOKENS_SUPPLY), the remaining tokens (i.e. the difference) will be minted for _wallet addresses (see above). The TOKEN instance will be unpaused, so that tokens become free tradable/transferable.
-Locked
+
+## Locked
  
 A Locked instance has to be deployed prior to finalization of crowdsale.  It receives a fixed share of TOKEN (see TOKENpresale Constants:  LOCKED), thus becoming a token holder. It allows the distribution of its tokens. The assigned owners can transfer these to their own accounts as soon as the 365 retention period has expired.
-Features
+
+###Features
+
 Ownable
 The Locked contract is Ownable, thus exposing a method to its owner for transferring the ownership to a new address.
 Retention period
@@ -243,31 +253,37 @@ One year after the creation of this contract instance the owner can destroy it.
 Team Member or Advisor
 To these accounts a share in tokens will be assigned.
 After the expire of the initial retention period, they can unlock (i.e. withdraw) their share in tokens, which will be transferred to their accounts.
+
 Lifecycle
+
 Retention Period
 During the first 365 days after contract instance creation the token share of team members and advisors can be set, but noone will be able to transfer them to their own account.
+
 Unlock Period
 After  the  retention  period  has  ended,  team  members  and  advisors  are  allowed  to  unlock  their  token share, thus triggering the transfer to their own accounts.
+
 Destruction
 When 500 days after the contract instance creation have passed,  the owner is allowed to destroy this contract instance. All remaining tokens of this contract instance will be transferred to the owner’s account. Team members and advisors who have not unlocked their tokens share will lose them.
 Constraints
+
 Allocation
 The amount of allocated tokens can be set for every team member or advisor account only once. The total amount of allocated tokens must not exceed the predefined cap (see Constants).
+
 Total Supply
 The  predefined cap of allocated tokens must not be greater than the amount of initially minted tokens LOCKED, otherwise it would be possible to allocate more tokens than available, i.e.  some team members won’t be able to unlock their share.
 Contracts Deployment Order
  
 The contracts must be deployed in the following order:
-Whitelist has to be deployed manually first. Its address is needed in the next step. Before deploying TOKENpresale it must be assured that the deployed Whitelist instance is fully functional, i.e.  the owner can add and remove addresses producing Whitelisted status results as expected. The constructor of TOKENpresale will accept any address as _whitelist parameter, but the  actual  usage  of  Whitelist (that  is  to  check  for  if  an  address  was  whitelisted) doesn’t  happen before the crowdsale period starts.
-TOKENpresale  has  to  be  deployed  manually  after  Whitelist. The following cannot be changed after deployment
+* Whitelist has to be deployed manually first. Its address is needed in the next step. Before deploying TokenSale it must be assured that the deployed Whitelist instance is fully functional, i.e.  the owner can add and remove addresses producing Whitelisted status results as expected. The constructor of TokenSale will accept any address as _whitelist parameter, but the  actual  usage  of  Whitelist (that  is  to  check  for  if  an  address  was  whitelisted) doesn’t  happen before the crowdsale period starts.
+* TOKENpresale  has  to  be  deployed  manually  after  Whitelist. The following cannot be changed after deployment
 _startTime
 _endTime
 _whitelist
 _wallet
 _rewardWallet
-TOKEN is deployed after TOKENpresale with TOKENpresale its owner. One can call the public getter function token() of the crowdsale instance to determine the token’s address.
-Airdropper requires address and decimals from TOKEN. Allow function is called by owner once Airdropper address created.
-Locked contracts must be deployed manually before the crowdsale gets finalized. Locked is loosely coupled to the other contracts. It is not essential for the crowdsale or token trading. Any time before crowdsale finalization the crowdsale’s contract owner can decide to replace it by another implementation or even to set a regular user account becoming the crowdsale instance’s Locked address. The contract will start a 365 day retention period on initialization therefore they should be deployed at the last possible moment after the crowdsale has ended and before calling finalize of the crowdsale contract instance.
+* TOKEN is deployed after TokenSale with TokenSale its owner. One can call the public getter function token() of the crowdsale instance to determine the token’s address.
+* Airdropper requires address and decimals from TOKEN. Allow function is called by owner once Airdropper address created.
+* Locked contracts must be deployed manually before the crowdsale gets finalized. Locked is loosely coupled to the other contracts. It is not essential for the crowdsale or token trading. Any time before crowdsale finalization the crowdsale’s contract owner can decide to replace it by another implementation or even to set a regular user account becoming the crowdsale instance’s Locked address. The contract will start a 365 day retention period on initialization therefore they should be deployed at the last possible moment after the crowdsale has ended and before calling finalize of the crowdsale contract instance.
 
 # Test Cases
 ## Test: Deployment of TOKEN
