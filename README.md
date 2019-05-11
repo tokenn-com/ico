@@ -235,93 +235,125 @@ _rewardWallet
 * Locked contracts must be deployed manually before the crowdsale gets finalized. Locked is loosely coupled to the other contracts. It is not essential for the crowdsale or token trading. Any time before crowdsale finalization the crowdsale’s contract owner can decide to replace it by another implementation or even to set a regular user account becoming the crowdsale instance’s Locked address. The contract will start a 365 day retention period on initialization therefore they should be deployed at the last possible moment after the crowdsale has ended and before calling finalize of the crowdsale contract instance.
 
 # Test Cases
+
 ## Test: Deployment of TOKEN
+
+
 Rationale: The token contract will be deployed automatically by TOKENpresale on initialization.
+
 Expected behavior:
-•       Success.
-•       Deployer account (crowdsale contract) becomes token owner.
-•       The global state variables name, symbol, decimals are correctly set.
+* Success.
+* Deployer account (crowdsale contract) becomes token owner.
+* The global state variables name, symbol, decimals are correctly set.
+
 ## Test: Deployment of TeamAndAvisorsAllocation
+
 Rationale: Contract TeamAndAvisorsAllocation must be deployable.
 
 Expected behavior:
-•       Success.
-•       Deployer account becomes contract instance owner.
-•       The state variable TOKEN is set to the constructor parameters value token.
-•       The state variable unlockedAt is correctly calculated as now + 365 days (= now + 365 * 24 * 60 * 60).
-•       The state variable canSelfDestruct is correctly calculated as now + 500 days (= now + 500 * 24 * 60 * 60).
+* Success.
+* Deployer account becomes contract instance owner.
+* The state variable TOKEN is set to the constructor parameters value token.
+* The state variable unlockedAt is correctly calculated as now + 365 days (= now + 365 * 24 * 60 * 60).
+* The state variable canSelfDestruct is correctly calculated as now + 500 days (= now + 500 * 24 * 60 * 60).
+
 ## Test: Constants sanity check
+
 Rationale: The constants totalLocked constitutes a cap on the amount of tokens that can be assigned by team members. It should not be greater than the amount of tokens that get minted for this contract on crowdsale finalization (TOKENpresale.VESTED_TEAM_ADVISORS_SHARE), otherwise some team members won’t be able to unlock their share.
 
 Expected behavior:
-•       The constraint is fulfilled.
+* The constraint is fulfilled.
+
 ## Test: Owner adds a team member’s share
+
 Rationale: The team member’s share gets saved.
 
 Expected behavior:
-•       Success.
-•       The total number of allocated tokens is increased by the share amount.
-•       The team member’s share is correctly added to the Lockeds.
+* Success.
+* The total number of allocated tokens is increased by the share amount.
+* The team member’s share is correctly added to the Lockeds.
+
 ## Test: Owner changes a team member’s share before it was unlocked
+
 Rationale: The share of a team member (an account) can be set only once until it gets unlocked and thus withdrawn by the team member.
 
 Expected behavior:
-•       Failure / transaction reversal.
+* Failure / transaction reversal.
+
 ## Test: Owner adds a team member’s share so that the total cap is exceeded
+
 Rationale: The total amount of allocated tokens totalLocked.
 
 Expected behavior:
-•       Failure / transaction reversal.
+* Failure / transaction reversal.
+
 ## Test: A third party (non-owner) adds an allocation
+
 Rationale: Only the owner should be able to add allocations.
 
 Expected behavior:
-•       Failure / transaction reversal.
+*Failure / transaction reversal.
+
 ## Test: Team member unlocks his/her share within retention period
+
 Rationale: Nobody should be able to unlock his/her share during the first 365 days after contract deployment.
 
 Expected behavior:
-•       Failure / transaction reversal.
+* Failure / transaction reversal.
+
 ##Test: Team member unlocks his/her share after retention period
+
 Rationale: Team members get their token share by unlocking it, so that it gets credited to their token balance.
 
 Expected behavior:
-•       Success.
-•       The total amount of tokens possessed by the contract is saved to tokensCreated if this was the first call to unlock() by anyone.
-•       Token balance of Locked contract is reduced by the team member’s share.
-•       Token balance of team member is increased by his/her share.
-•       The allocation of the team member is set to zero.
+* Success.
+* The total amount of tokens possessed by the contract is saved to tokensCreated if this was the first call to unlock() by anyone.
+* Token balance of Locked contract is reduced by the team member’s share.
+* Token balance of team member is increased by his/her share.
+* The allocation of the team member is set to zero.
+
 ## Test: Team member unlocks his/her share after contract was killed
+
 Rationale: After killing the contract no unlocking of token share should be possible.
 
 Expected behavior:
-•       Failure / transaction reversal.
+* Failure / transaction reversal.
+
 ## Test: A third party (non-team-member) unlocks
+
 Rationale: Non-team-members have no token share, i.e. their allocation is zero. If they attempt to unlock they’ll waste gas.
+
 ## Test: Owner kills contract within the first 500 days after deployment
+
 Rationale: The Locked contract instance has to be accessible for at least 500 days.
 
 Expected behavior:
-•       Failure / transaction reversal.
-•       Success.
-•       The total amount of tokens possessed by the contract is saved to tokensCreated if this was  the first call to unlock() by anyone.
-•       An amount of zero tokens will be transferred / added to the caller’s balance.
+* Failure / transaction reversal.
+* Success.
+* The total amount of tokens possessed by the contract is saved to tokensCreated if this was  the first call to unlock() by anyone.
+* An amount of zero tokens will be transferred / added to the caller’s balance.
+
 ## Test: Owner kills contract 500 days or more after deployment
+
 Rationale: Destroying the Locked contract will make all team members lose their not-yet unlocked token share.
 
 Expected behavior:
-•       All remaining tokens of the contract (including those which weren’t unlocked by team members) get transferred to the owner, thus increasing his/her token balance.
-•       Token balance of Locked instance is zero. • The contract gets destroyed (code data of account is set to 0x0).
+* All remaining tokens of the contract (including those which weren’t unlocked by team members) get transferred to the owner, thus increasing his/her token balance.
+* Token balance of Locked instance is zero. • The contract gets destroyed (code data of account is set to 0x0).
 
 ## Test Environments
 
-The TOKEN ICO contracts were tested on different networks.
-1.     Deployment on the Rinkeby test network.
+The TOKEN ICO contracts were tested on different networks:
 
-•       The testing was carried out by manually calling the contract functions via MyEtherWallet and MetaMask from different accounts.
-•       Analysis of transaction history and contract state were done via MyEtherWallet and Etherscan.
-2.     Deployment on a local machine.
-·       Automated tests for the Truffle (v4.0.5) test framework were written and executed on a local Ganache-CLI (v6.0.3) instance.
-3.     Deployment on a local test network.
-·       The above mentioned automated tests and some additional manual tests were carried out on a Parity (v1.8.6) development network.
-·       Analysis of transaction history and contract state was done via Parity’s frontend.
+### Deployment on the Rinkeby test network.
+
+* The testing was carried out by manually calling the contract functions via MyEtherWallet and MetaMask from different accounts.
+* Analysis of transaction history and contract state were done via MyEtherWallet and Etherscan.
+
+### Deployment on a local machine.
+
+* Automated tests for the Truffle (v4.0.5) test framework were written and executed on a local Ganache-CLI (v6.0.3) instance.
+* Deployment on a local test network.
+
+### The above mentioned automated tests and some additional manual tests were carried out on a Parity (v1.8.6) development network.
+*Analysis of transaction history and contract state was done via Parity’s frontend.
