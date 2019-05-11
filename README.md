@@ -20,8 +20,7 @@ Required wallets include
 * Airdropper owner
 * Whitelist owner
 * TokenSale owner
-* TOKEN owner
-Owned by TokenSale
+* TOKEN owner (It is owned by TokenSale)
 * Locked
 
 ## Parameters
@@ -97,7 +96,8 @@ TOTAL_TOKENS_SUPPLY  >=  REWARD_SHARE +  VESTED_TEAM_ADVISORS_SHARE +  NON_VESTE
 ### Features
 
 Ownable - The owner of an TokenSale instance can transfer the ownership at any time to any other account.
-Pausable - During the crowdsale (i.e. from start till end) the sale of tokens to investors can be halted and continued by the TokenSale instance’s owner. Pausing in other periods is possible but without any effects.
+
+Pausable - During the crowdsale (i.e. from start till end) the sale of tokens to investors can be halted or continued by the TokenSale instance’s owner. Pausing in other periods is possible but without any effects.
 
 Early buyers - During the crowdsale start, the amount of tokens a single investor can buy is capped (see Constants:  PERSONAL_CAP) E.g. PERSONAL_CAP = 2.5million (e.g. 2500000e18 (~ 2.5M ×10 18  tokens)). This is independent of if the contributor already received tokens due to presale minting.
 
