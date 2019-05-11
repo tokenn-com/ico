@@ -11,6 +11,7 @@ This crowdsale smart contract builds on (forked) triple-audided crowdsale smart 
 * TokenSale
 * TOKEN
 * Locked
+* Uniswapping (New)
 
 ## Addresses and wallets
 
@@ -42,17 +43,16 @@ tokens per wei rate
 
 * Presale
 * Crowdsale
-* Bounties
-* Team 
-* Other
-* Uniswap (pooled ETH depends on tokens per wei rate)
+* Vested
+* Non-vested
+* Uniswapper (pooled ETH depends on tokens per wei rate)
 * TOTAL
 
 # Contracts
 
 ## Airdropper
 
-An airdropper contract completes all individual transfers within one combined transaction reducing fees associated with the distribution. Airdropper never holds tokens. Instead it calls ERC20's transferFrom to transfer tokens directly from the reward wallet to the recipients. Recipients can see that their tokens came directly from this address, so they can verify that they received their rewards in good order. The address is recorded in the TOKEN ICO repository. The contract can be tested on the main network without interfering with the allocation of reward TOKEN, and without the need to deploy a new instance after testing.
+An airdropper contract completes all individual transfers (for example for bounties) within one combined transaction reducing fees associated with the distribution. Airdropper never holds tokens. Instead it calls ERC20's transferFrom to transfer tokens directly from the _reward wallet to the recipients. Recipients can see that their tokens came directly from this address, so they can verify that they received their rewards in good order. The address is recorded in the repository. The contract can be tested on the main network without interfering with the allocation of reward TOKEN, and without the need to deploy a new instance after testing.
 
 Airdropper also has a method to self-destruct, which is called as soon as tokens have been distributed to all recipients. This prevents it from being used as an attack vector in any future zero-day exploits, and takes some load off the Ethereum network (it's important to be a good neighbour).
 
@@ -62,75 +62,69 @@ The whitelist contract will contain the (mutable) addresses of backers who are a
 
 ### Features
 
-Ownable - The owner if the Whitelist instance can transfer the ownership at any time to any other account.
+Ownable - The owner of the Whitelist instance is initially the account that deployed the Whitelist instance. The owner can transfer the ownership at any time to any other account. The owner does not need to be the same as that of the TokenSale instance.
 
 Mutability - Addresses can be added to or removed from a Whitelist instance by its owner at any time.
 
-Owner - Only the Whitelist instance’s owner is allowed to add/remove addresses to/from the whitelist. Initially, this will be the account who deployed the Whitelist instance, but ownership can be transferred later by the current owner to any other account. The owner does not need to be the same as of the TokenSale instance.
-
 Lifecycle - Whitelist’s behavior is invariant with respect to time.
 
-Constraints - Only the owner is allowed to add or remove addresses. There are no time related restrictions on adding or removing entries. The TokenSale instance will read this set only during the crowdsale period.
+Constraints - Only the owner is allowed to add or remove addresses to/from the whitelist. There are no time related restrictions on adding or removing entries. The TokenSale instance will read this set only during the crowdsale period.
 
 ## TokenSale
  
-When TokenSale is deployed it creates a new Token instance, thus becoming its owner. 
+When TokenSale is deployed it creates a new TOKEN instance, thus becoming its owner. 
 
 The following token related constants are defined:
 
-Amount of tokens minted in total | TOTAL_TOKENS_SUPPLY | E.g. 50 million (50000000e18 (~ 50M ×10 18  tokens)
-Amount of tokens minted in favor of the _reward account on crowdsale finalization | REWARD_SHARE (old name BOUNTY_REWARD_SHARE) | E.g. 4.5 million (4500000e18 (~ 4.5M ×10 18  tokens))
-Amount of tokens minted in favor of the _wallet account on crowdsale finalization | VESTED_TEAM_ADVISORS_ SHARE
-Amount of tokens minted in favor of the _wallet account on crowdsale finalization | COMPANY_SHARE
-Amount of tokens minted in favor of Locked instance on crowdsale finalization | LOCKED (formerly called NON_VESTED_TEAM_ADVISORS_SHARE) | E.g. 37.5 million (37500000e18 (~ 37.5M ×10 18  tokens))
-Maximum total amount of tokens minted in favor of PreSale buyers. | PRE_CROWDSALE_CAP | E.g. 0.5million (500000e18 (~ 0.5M ×10 18  tokens))
-Maximum total amount of tokens bought by contributors during presale | PUBLIC_CROWDSALE_CAP | 7.5million (7500000e18 (~ 7.5M ×10 18  tokens))
-Maximum total amount of tokens minted during pre-sale and crowdsale | TOTAL_TOKENS_FOR_CROWDSALE =  PRE_CROWDSALE_CAP  +  PUBLIC_CROWDSALE_CAP | E.g. 8million ( 8000000e18 (~  8M×10 18  tokens))
+* TOTAL_TOKENS_SUPPLY - Amount of tokens minted in total. E.g. 50 million (50000000e18 (~ 50M ×10 18  tokens)
+REWARD_SHARE (old name BOUNTY_REWARD_SHARE) - Amount of tokens minted in favor of the _reward account on crowdsale finalization. E.g. 4.5 million (4500000e18 (~ 4.5M ×10 18  tokens))
+* VESTED_TEAM_ADVISORS_ SHARE - Amount of tokens minted in favor of the _wallet account on crowdsale finalization
+* COMPANY_SHARE - Amount of tokens minted in favor of the _wallet account on crowdsale finalization
+* LOCKED (formerly called NON_VESTED_TEAM_ADVISORS_SHARE) - Amount of tokens minted in favor of Locked instance on crowdsale finalization. E.g. 37.5 million (37500000e18 (~ 37.5M ×10 18  tokens))
+* UNISWAPPED (NEW) - Amount of tokens minted in favor of the Uniswapper instance on crowdsale finalization
+* PRE_CROWDSALE_CAP - Maximum total amount of tokens minted in favor of PreSale buyers. E.g. 0.5million (500000e18 (~ 0.5M ×10 18  tokens))
+* PUBLIC_CROWDSALE_CAP - Maximum total amount of tokens that can be bought by contributors during crowdsale. E.g. 7.5million (7500000e18 (~ 7.5M ×10 18  tokens))
+* TOTAL_TOKENS_FOR_CROWDSALE ( =  PRE_CROWDSALE_CAP  +  PUBLIC_CROWDSALE_CAP) - Maximum total amount of tokens minted during pre-sale and crowdsale. E.g. 8million ( 8000000e18 (~  8M×10 18  tokens))
 
-Total supply
+### Total supply
  
 TOTAL_TOKENS_SUPPLY  == token.totalSupply
-TOTAL_TOKENS_FOR_CROWDSALE  = PRE_CROWDSALE_CAP + PUBLIC_CROWDSALE_CAP.
-TOTAL_TOKENS_FOR_CROWDSALE  <=  TOTAL_TOKENS_SUPPLY
-TOTAL_TOKENS_SUPPLY  >=  REWARD_SHARE +  VESTED_TEAM_ADVISORS_SHARE +  NON_VESTED_TEAM_ADVISORS_SHARE +  COMPANY_SHARE +  TOTAL_TOKENS_FOR_CROWDSALE
+TOTAL_TOKENS_FOR_SALE (previously called TOTAL_TOKENS_FOR_CROWDSALE) = PRE_CROWDSALE_CAP + PUBLIC_CROWDSALE_CAP.
+TOTAL_TOKENS_FOR_SALE <=  TOTAL_TOKENS_SUPPLY
+TOTAL_TOKENS_SUPPLY  >=  REWARD_SHARE +  VESTED_TEAM_ADVISORS_SHARE +  NON_VESTED_TEAM_ADVISORS_SHARE +  COMPANY_SHARE +  TOTAL_TOKENS_FOR_SALE + UNISWAPPER_SHARE
 
 ### Features
 
-Ownable - The owner of an TokenSale instance can transfer the ownership at any time to any other account.
-
-Pausable - During the crowdsale (i.e. from start till end) the sale of tokens to investors can be halted or continued by the TokenSale instance’s owner. Pausing in other periods is possible but without any effects.
-
-Early buyers - During the crowdsale start, the amount of tokens a single investor can buy is capped (see Constants:  PERSONAL_CAP) E.g. PERSONAL_CAP = 2.5million (e.g. 2500000e18 (~ 2.5M ×10 18  tokens)). This is independent of if the contributor already received tokens due to presale minting.
-
-Total amount - The total amount of tokens that can be bought during crowdsale is capped (see Constants: TOTAL_TOKENS_FOR_CROWDSALE). If the last contributor tries to buy more tokens than are available, he/she will get the remaining ones (with respect to the cap) and his/her address along with the overpaid amount of ether will be stored for later refund. These refunds will be paid out manually.
-
-Finalizable - After the end of crowdsale, the TokenSale instance has to be finalized to enable the free trade/transfer of tokens. This can be done solely by the owner, only after the crowdsale has ended, and only once.
-
-### Accounts/Roles
-
-Owner - the owner of an TokenSale instance is the account who created/deployed it. The owner can:
+Ownable - The owner of an TokenSale instance can transfer the ownership at any time to any other account. The initial owner of an TokenSale instance is the account who created/deployed it. The owner can:
 * transfer ownership at any time to any other account
 * mint  tokens  for  the  benefit  of  any  account  as  long as a) the crowdsale has not started yet, and b) the  total  will  not  exceed  the  presale  cap  (see  Constants:  PRE_CROWDSALE_CAP)
 * adjust the (tokens per wei) rate at any time to any non-zero value.
 * set the address of a deployed Locked instance
 * finalize the contract instance after the crowdsale has ended (and only if it wasn’t finalized already)
+
+Pausable - During the crowdsale (i.e. from start till end) the sale of tokens to investors can be halted or continued by the TokenSale instance’s owner. Pausing in other periods is possible but without any effects.
+
+Early buyers - During the crowdsale start, the amount of tokens a single investor can buy is capped (see Constants:  PERSONAL_CAP) E.g. PERSONAL_CAP = 2.5million (e.g. 2500000e18 (~ 2.5M ×10 18  tokens)). This is independent of if the contributor already received tokens due to presale minting.
+
+Total amount - The total amount of tokens that can be bought during crowdsale is capped (see Constants: TOTAL_TOKENS_FOR_SALE). If the last contributor tries to buy more tokens than are available, he/she will get the remaining ones (with respect to the cap) and his/her address along with the overpaid amount of Ether will be stored for later refund. These refunds will be paid out manually.
+
+Finalizable - After the end of crowdsale, the TokenSale instance has to be finalized to enable the free trade/transfer of tokens. This can be done solely by the owner, only after the crowdsale has ended, and only once.
  
 ## Wallet
 
-Crowdsale funds - This wallet (usually a multisig) will hold the crowdsale funds received during the crowdsale. The wallet address must be given when creating a TokenSale instance and cannot be changed afterwards.
+Crowdsale funds - This wallet (usually a multisig) will hold the crowdsale funds received during the crowdsale (as they are received by TokenSale instance). The _wallet address must be given when creating a TokenSale instance and cannot be changed afterwards.
 
 Tokens - When the crowdsale is finalized, NON_VESTED_TEAM_ADVISORS_SHARE, and COMPANY_SHARE will be minted for the benefit of the _wallet account.
 
 ## Reward Wallet
 
-When the crowdsale is finalized, a fixed amount of tokens from the rewards campaign (see Constants: sol: REWARD_SHARE) will be minted for the benefit of this account.
+Reward tokens - When the crowdsale is finalized, a fixed amount of tokens from the rewards campaign (see Constants: sol: REWARD_SHARE) will be minted for the benefit of this account.
 
 ## Token
 
-TOKEN is an ERC20 compliant token contract. TokenSale will become the TOKEN instance’s owner, therefore, the following sections refer to an TOKEN instance created and owned by an existing TokenSale instance. Transferring the ownership of the TokenSale instance doesn’t affect the ownership of its assigned TOKEN instance (it will remain the crowdsale contract instance).
+TOKEN is an ERC20 compliant token contract. TokenSale will become the TOKEN instance’s owner, therefore, the following sections refer to a TOKEN instance created and owned by an existing TokenSale instance. Transferring the ownership of the TokenSale instance doesn’t affect the ownership of its assigned TOKEN instance (it will remain the crowdsale contract instance).
 
-Lifecycle
-During initialization, i.e. deployment, of a TokenSale instance, a paused TOKEN instance will be created, and the following state variables will be stored:
+Lifecycle - During initialization, i.e. deployment, of a TokenSale instance, a paused TOKEN instance will be created, and the following state variables will be stored:
 * start time of crowdsale period
 * end time of crowdsale period
 * wallet address
@@ -138,69 +132,79 @@ During initialization, i.e. deployment, of a TokenSale instance, a paused TOKEN 
 * address of prior to this created Whitelist instance
 * address of newly created TOKEN instance
 * (tokens per wei) rate
-* address of newly created Uniswap Market
 
 ### Features
 
-Ownable - The TOKEN contract is Ownable, thus exposing a method to its owner for transferring the ownership to a new address. But since TokenSale is its owner and doesn’t use this feature, it will stay its TOKEN’s owner forever.
+Ownable - The TOKEN contract is ownable, thus exposing a method to its owner for transferring the ownership to a new address. But since TokenSale is its owner and doesn’t use this feature, it will stay its TOKEN’s owner forever.
+
 Pausable - The trade of tokens, i.e. transfer from one account to another, of tokens can be halted and continued by its owner (see Lifecycle).
 
-Mintable - The TOKEN instance’s owner is able to mint some tokens, i.e. create new tokens and increase any account’s token balance.
+Mintable - The TOKEN instance’s owner is able to mint tokens, i.e. create new tokens and increase any account’s token balance.
 
 ### Accounts/Roles
 
 Owner - The TokenSale instance will own the TOKEN instance.
 
-Token holders - The TOKEN contract by itself does not impose any restrictions on which accounts can hold tokens. But as the contract instance is owned by a TokenSale instance, there are some limitations on how to get tokens:
+Token holders - The TOKEN contract by itself does not impose any restrictions on which accounts can hold tokens. But as the contract instance is owned by a TokenSale instance, there are limitations on how to get tokens:
 1.  Being a presale buyer and receiving tokens from the instance owner before the crowdsale period starts.
 2.  Becoming whitelisted by the Whitelist instance’s owner, thus being allowed to purchase tokens during the crowdsale period.
 3.  The predefined wallet and reward accounts will get their allocated tokens at the end of crowdsale period.
 4.  Tokens allocated by the Locked instance owner, which are available after the retention period has ended.
 5.  Being the receiver of a freely tradable ERC20 compliant token transfer after the crowdsale has ended.
 
-Lifecycle
+### Lifecycle
 
-Paused
-When an TOKEN instance is created its state will be set paused, therefore, token minting is possible but trade/transfer is not.
+Paused - When an TOKEN instance is created its state will be set paused, therefore, token minting is possible but trade/transfer is not.
 
-Unpaused
-After the crowdsale period has ended, the TokenSale instance has to be finalized manually (or by any off-chain automatism). The TokenSale instance will unpause its TOKEN instance making tokens transferable from token holders to any Ethereum accounts. TokenSale ensures that minting of tokens is not possible anymore.
+Unpaused - After the crowdsale period has ended, the TokenSale instance has to be finalized manually (or by any off-chain automatism). The TokenSale instance will unpause its TOKEN instance making tokens transferable from token holders to any Ethereum accounts. TokenSale ensures that minting of tokens is not possible anymore.
 
-Constraints
-The TOKEN by itself doesn’t impose any restrictions on when it is paused/unpaused or beneficiaries of minted or transferred tokens as these are controlled by the owning TokenSale instance.
+Constraints - The TOKEN by itself doesn’t impose any restrictions on when it is paused/unpaused or beneficiaries of minted or transferred tokens as these are controlled by the owning TokenSale instance.
 
-Pause/Unpause
-The pause/unpause state can be changed by the owning TokenSale instance only.
+Pause/Unpause - The pause/unpause state can be changed by the owning TokenSale instance only.
 
-Minting
-The amount and receivers of minted tokens is controlled by the owning TokenSale instance only.
+Minting - The amount and receivers of minted tokens is controlled by the owning TokenSale instance only.
 
-Total Supply
-The  maximum  total  supply  of  tokens  is  controlled  by  the  owning  TokenSale  instance’s  minting restrictions  and  won’t  exceed  TOTAL_TOKENS_FOR_CROWDSALE (see  Crowdsale  Constants)  before crowdsale finalization. After  crowdsale  finalization  the  total  amount  of  tokens  is  fixed  to  TOTAL_TOKENS_SUPPLY  (see Crowdsale Constants).
+Total Supply - The  maximum  total  supply  of  tokens  is  controlled  by  the  owning  TokenSale  instance’s  minting restrictions  and  won’t  exceed  TOTAL_TOKENS_FOR_SALE (see  Crowdsale  Constants)  before crowdsale finalization. After  crowdsale  finalization  the  total  amount  of  tokens  is  fixed  to  TOTAL_TOKENS_SUPPLY  (see Crowdsale Constants).
 
-End of Crowdsale
-The crowdsale ends if either the crowdsale period elapsed or all available tokens were purchased. In the latter case the crowdsale will end before its predefined end time.
+End of Crowdsale - The crowdsale ends if either the crowdsale period elapsed or all available tokens were purchased. In the latter case the crowdsale will end before its predefined end time.
 
 If the total supplied tokens is below a predefined cap (see Constants: TOTAL_TOKENS_SUPPLY), the remaining tokens (i.e. the difference) will be minted for _wallet addresses (see above). The TOKEN instance will be unpaused, so that tokens become free tradable/transferable.
 
 ## Locked
  
-A Locked instance has to be deployed prior to finalization of crowdsale.  It receives a fixed share of TOKEN (see TokenSale Constants:  LOCKED), thus becoming a token holder. It allows the distribution of its tokens. The assigned owners can transfer these to their own accounts as soon as the retention period has expired.
+A Locked instance has to be deployed prior to finalization of crowdsale.  It receives a fixed share of tokens (see TokenSale Constants:  LOCKED), thus becoming a token holder. It allows the distribution of its tokens. The assigned accounts can transfer these to their own accounts as soon as the retention period has expired.
 
 ### Features
 
-Ownable - The Locked contract is Ownable, thus exposing a method to its owner for transferring the ownership to a new address.
+Ownable - The Locked contract is Ownable, thus exposing a method to its owner for transferring the ownership to a new address. The owner can assign token shares to team members and advisors. The owner can destroy it after the destruction period.
 
 Retention period - The withdrawal of tokens is blocked for 365 days after the finalization of the crowdsale. During the first 365 days after contract instance creation the token share of team members and advisors can be set, but no one will be able to transfer them to their own account.
 
-Unlock Period
-After  the  retention  period  has  ended,  team  members  and  advisors  are  allowed  to  unlock  their  token share, thus triggering the transfer to their own accounts.
+Unlock Period - After  the  retention  period  has  ended,  team  members  and  advisors  are  allowed  to  unlock  their  token share, thus triggering the transfer to their own accounts.
 
 Destruction - At least 500 days after finalization of the crowdsale, this contract instance can be destroyed by the contract’s owner. All remaining tokens of this contract instance will be transferred to the owner’s account. Team members and advisors who have not unlocked their tokens share will lose them.
 
-### Accounts/Roles
+Team Member or Advisor -  A number of tokens can be assigned to these accounts. After the expiration of the initial retention period, they can unlock (i.e. withdraw) their share in tokens, which will be transferred to their accounts.
 
-Owner - The owner can assign token shares to team members and advisors. The owner can destroy it after the destruction period.
+### Constraints
+
+Allocation - The amount of allocated tokens can be set for every team member or advisor account only once. The total amount of allocated tokens must not exceed the predefined cap (see Constants).
+
+Total Supply - The  predefined cap of allocated tokens must not be greater than the amount of initially minted tokens LOCKED, otherwise it would be possible to allocate more tokens than available, i.e.  some team members won’t be able to unlock their share.
+
+## Uniswapper
+ 
+A Uniswapper instance has to be deployed before the crowdsale commences.  It receives a fixed share of tokens (see TokenSale Constants:  UNISWAPPER), thus becoming a token holder. It also receives a percentage of ETH raised. It sends the tokens and ETH to the token's Uniswap Market and receives the Uniswap liquidity tokens. Its owner can return the Uniswap Liquidity tokens after the retention period and receive the tokens plus ETH. It allows the distribution of its tokens. The assigned accounts can transfer these to their own accounts as soon as the retention period has expired.
+
+### Features
+
+Ownable - The Locked contract is Ownable, thus exposing a method to its owner for transferring the ownership to a new address. The owner can assign token shares to team members and advisors. The owner can destroy it after the destruction period.
+
+Retention period - The withdrawal of tokens is blocked for 365 days after the finalization of the crowdsale. During the first 365 days after contract instance creation the token share of team members and advisors can be set, but no one will be able to transfer them to their own account.
+
+Unlock Period - After  the  retention  period  has  ended,  team  members  and  advisors  are  allowed  to  unlock  their  token share, thus triggering the transfer to their own accounts.
+
+Destruction - At least 500 days after finalization of the crowdsale, this contract instance can be destroyed by the contract’s owner. All remaining tokens of this contract instance will be transferred to the owner’s account. Team members and advisors who have not unlocked their tokens share will lose them.
 
 Team Member or Advisor -  A number of tokens can be assigned to these accounts. After the expiration of the initial retention period, they can unlock (i.e. withdraw) their share in tokens, which will be transferred to their accounts.
 
