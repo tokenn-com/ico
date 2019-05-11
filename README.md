@@ -11,7 +11,7 @@ This crowdsale smart contract builds on (forked) triple-audided crowdsale smart 
 * TokenSale
 * TOKEN
 * Locked
-* Uniswapping (New)
+* Uniswapper (New)
 
 ## Addresses and wallets
 
@@ -22,7 +22,8 @@ Required wallets include
 * Whitelist owner
 * TokenSale owner
 * TOKEN owner (It is owned by TokenSale)
-* Locked
+* Locked owner
+* Unswapper owner
 
 ## Parameters
 
@@ -43,9 +44,9 @@ tokens per wei rate
 
 * Presale
 * Crowdsale
-* Vested
-* Non-vested
-* Uniswapper (pooled ETH depends on tokens per wei rate)
+* Vested team and advisors
+* Non-vested team and advisors
+* Project reserves
 * TOTAL
 
 # Contracts
@@ -112,9 +113,13 @@ Finalizable - After the end of crowdsale, the TokenSale instance has to be final
  
 ## Wallet
 
-Crowdsale funds - This wallet (usually a multisig) will hold the crowdsale funds received during the crowdsale (as they are received by TokenSale instance). The _wallet address must be given when creating a TokenSale instance and cannot be changed afterwards.
+The wallet address must be given when creating a TokenSale instance and cannot be changed afterwards.
 
-Tokens - When the crowdsale is finalized, NON_VESTED_TEAM_ADVISORS_SHARE, and COMPANY_SHARE will be minted for the benefit of the _wallet account.
+This wallet will receive:
+* The crowdsale funds raised during the crowdsale (as they are received by TokenSale instance).
+* When the crowdsale is finalized, NON_VESTED_TEAM_ADVISORS_SHARE, and COMPANY_SHARE will be minted for the benefit of the _wallet account.
+
+This wallet will send the same percentage - that Reserves are of total tokens - of ETH raised to the Uniswapper instance. 
 
 ## Reward Wallet
 
@@ -194,7 +199,7 @@ Total Supply - The  predefined cap of allocated tokens must not be greater than 
 
 ## Uniswapper
  
-A Uniswapper instance has to be deployed before the crowdsale commences.  It receives a fixed share of tokens (see TokenSale Constants:  UNISWAPPER), thus becoming a token holder. It also receives a percentage of ETH raised. It sends the tokens and ETH to the token's Uniswap Market and receives the Uniswap liquidity tokens. Its owner can return the Uniswap Liquidity tokens after the retention period and receive the tokens plus ETH. It allows the distribution of its tokens. The assigned accounts can transfer these to their own accounts as soon as the retention period has expired.
+A Uniswapper instance has to be deployed before the crowdsale commences.  It also receives a fixed percentage of ETH raised (the percentage of total tokens that are Reserves). It receives the projects Reserve tokens (see TokenSale Constants:  RESERVE) when TokenSale is finalized, thus becoming a token holder.  Upon receiving the Reserve tokens it sends the ETH and their value in tokens to the token's Uniswap Market and receives the Uniswap liquidity tokens. Its owner can return the Uniswap Liquidity tokens after the retention period and receive the tokens plus ETH. It allows the transfer of its tokens by its owner.
 
 ### Features
 
