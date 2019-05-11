@@ -33,12 +33,14 @@ tokens per wei rate
 
 ### Timings
 
-* Deploy date
 * Crowdsale start
 * Crowdsale end
-* Finalization date
+* Finalization
+* Early crowdsale personal cap duration
 * Non-vest lock in time (days after deployment)
 * Non-vest kill before (days after deployment)
+* Uniswapper lock in time (days after deployment)
+* Uniswapper kill before (days after deployment)
 
 ### Token allocations
 
@@ -85,6 +87,7 @@ REWARD_SHARE (old name BOUNTY_REWARD_SHARE) - Amount of tokens minted in favor o
 * UNISWAPPED (NEW) - Amount of tokens minted in favor of the Uniswapper instance on crowdsale finalization
 * PRE_CROWDSALE_CAP - Maximum total amount of tokens minted in favor of PreSale buyers. E.g. 0.5million (500000e18 (~ 0.5M ×10 18  tokens))
 * PUBLIC_CROWDSALE_CAP - Maximum total amount of tokens that can be bought by contributors during crowdsale. E.g. 7.5million (7500000e18 (~ 7.5M ×10 18  tokens))
+* PERSONAL_CAP - Maximum total amount of tokens that can be bought by an individual during the early crowdsale personal cap period
 * TOTAL_TOKENS_FOR_CROWDSALE ( =  PRE_CROWDSALE_CAP  +  PUBLIC_CROWDSALE_CAP) - Maximum total amount of tokens minted during pre-sale and crowdsale. E.g. 8million ( 8000000e18 (~  8M×10 18  tokens))
 
 ### Total supply
@@ -105,7 +108,9 @@ Ownable - The owner of an TokenSale instance can transfer the ownership at any t
 
 Pausable - During the crowdsale (i.e. from start till end) the sale of tokens to investors can be halted or continued by the TokenSale instance’s owner. Pausing in other periods is possible but without any effects.
 
-Early buyers - During the crowdsale start, the amount of tokens a single investor can buy is capped (see Constants:  PERSONAL_CAP) E.g. PERSONAL_CAP = 2.5million (e.g. 2500000e18 (~ 2.5M ×10 18  tokens)). This is independent of if the contributor already received tokens due to presale minting.
+Presale - PRE_SALE_UNSOLD = PRE_CROWDSALE_CAP – tokens minted for pre-sale investors. Unsold tokens are not minted and are available in crowdsale phase.
+
+Early buyers - During the crowdsale start, the amount of tokens a single investor can buy is capped for a period of time (see Constants:  PERSONAL_CAP) E.g. PERSONAL_CAP = 2.5million (e.g. 2500000e18 (~ 2.5M ×10 18  tokens)). This is independent of if the contributor already received tokens due to presale minting.
 
 Total amount - The total amount of tokens that can be bought during crowdsale is capped (see Constants: TOTAL_TOKENS_FOR_SALE). If the last contributor tries to buy more tokens than are available, he/she will get the remaining ones (with respect to the cap) and his/her address along with the overpaid amount of Ether will be stored for later refund. These refunds will be paid out manually.
 
@@ -181,15 +186,13 @@ A Locked instance has to be deployed prior to finalization of crowdsale.  It rec
 
 ### Features
 
-Ownable - The Locked contract is Ownable, thus exposing a method to its owner for transferring the ownership to a new address. The owner can assign token shares to team members and advisors. The owner can destroy it after the destruction period.
+Ownable - The Locked contract is Ownable, thus exposing a method to its owner for transferring the ownership to a new address. The owner can assign token shares to team members and advisors during the first 365 days after contract instance creation. The owner can destroy it after the destruction period.
 
-Retention period - The withdrawal of tokens is blocked for 365 days after the finalization of the crowdsale. During the first 365 days after contract instance creation the token share of team members and advisors can be set, but no one will be able to transfer them to their own account.
+Retention period - The withdrawal of tokens is blocked for 365 days after the finalization of the crowdsale. After the expiration of the initial retention period, they can unlock (i.e. withdraw) their share in tokens, which will be transferred to their accounts.
 
 Unlock Period - After  the  retention  period  has  ended,  team  members  and  advisors  are  allowed  to  unlock  their  token share, thus triggering the transfer to their own accounts.
 
 Destruction - At least 500 days after finalization of the crowdsale, this contract instance can be destroyed by the contract’s owner. All remaining tokens of this contract instance will be transferred to the owner’s account. Team members and advisors who have not unlocked their tokens share will lose them.
-
-Team Member or Advisor -  A number of tokens can be assigned to these accounts. After the expiration of the initial retention period, they can unlock (i.e. withdraw) their share in tokens, which will be transferred to their accounts.
 
 ### Constraints
 
@@ -199,7 +202,7 @@ Total Supply - The  predefined cap of allocated tokens must not be greater than 
 
 ## Uniswapper
  
-A Uniswapper instance has to be deployed before the crowdsale commences.  It also receives a fixed percentage of ETH raised (the percentage of total tokens that are Reserves). It receives the projects Reserve tokens (see TokenSale Constants:  RESERVE) when TokenSale is finalized, thus becoming a token holder.  Upon receiving the Reserve tokens it sends the ETH and their value in tokens to the token's Uniswap Market and receives the Uniswap liquidity tokens. Its owner can return the Uniswap Liquidity tokens after the retention period and receive the tokens plus ETH. It allows the transfer of its tokens by its owner.
+A Uniswapper instance has to be deployed before the crowdsale commences.  It receives a fixed percentage of ETH raised from wallet (the percentage of total tokens that are Reserves). It receives the project's Reserve tokens (see TokenSale Constants:  RESERVE) when TokenSale is finalized, thus becoming a token holder.  Upon receiving the Reserve tokens it sends the ETH and their value in tokens to the Uniswap Market and receives the Uniswap liquidity tokens. Its owner can return the Uniswap Liquidity tokens after the retention period and receive the tokens plus ETH. It then allows the transfer of its tokens by its owner.
 
 ### Features
 
@@ -210,14 +213,6 @@ Retention period - The withdrawal of tokens is blocked for 365 days after the fi
 Unlock Period - After  the  retention  period  has  ended,  team  members  and  advisors  are  allowed  to  unlock  their  token share, thus triggering the transfer to their own accounts.
 
 Destruction - At least 500 days after finalization of the crowdsale, this contract instance can be destroyed by the contract’s owner. All remaining tokens of this contract instance will be transferred to the owner’s account. Team members and advisors who have not unlocked their tokens share will lose them.
-
-Team Member or Advisor -  A number of tokens can be assigned to these accounts. After the expiration of the initial retention period, they can unlock (i.e. withdraw) their share in tokens, which will be transferred to their accounts.
-
-### Constraints
-
-Allocation - The amount of allocated tokens can be set for every team member or advisor account only once. The total amount of allocated tokens must not exceed the predefined cap (see Constants).
-
-Total Supply - The  predefined cap of allocated tokens must not be greater than the amount of initially minted tokens LOCKED, otherwise it would be possible to allocate more tokens than available, i.e.  some team members won’t be able to unlock their share.
 
 # Contracts Deployment Order
  
