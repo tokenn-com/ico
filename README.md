@@ -45,7 +45,8 @@ tokens per wei rate
 * Bounties
 * Team 
 * Other
-TOTAL
+* Uniswap (pooled ETH depends on tokens per wei rate)
+* TOTAL
 
 # Contracts
 
