@@ -84,7 +84,7 @@ REWARD_SHARE (old name BOUNTY_REWARD_SHARE) - Amount of tokens minted in favor o
 * VESTED_TEAM_ADVISORS_ SHARE - Amount of tokens minted in favor of the _wallet account on crowdsale finalization
 * COMPANY_SHARE - Amount of tokens minted in favor of the _wallet account on crowdsale finalization
 * LOCKED (formerly called NON_VESTED_TEAM_ADVISORS_SHARE) - Amount of tokens minted in favor of Locked instance on crowdsale finalization. E.g. 37.5 million (37500000e18 (~ 37.5M ×10 18  tokens))
-* RESERVE (NEW) - Amount of project reserve tokens. They are minted in favor of the Uniswapper instance on crowdsale finalization
+* UNISWAPPER_SHARE (NEW) - Amount of project company reserve tokens. They are minted in favor of the Uniswapper instance on crowdsale finalization
 * PRE_CROWDSALE_CAP - Maximum total amount of tokens minted in favor of PreSale buyers. E.g. 0.5million (500000e18 (~ 0.5M ×10 18  tokens))
 * PUBLIC_CROWDSALE_CAP - Maximum total amount of tokens that can be bought by contributors during crowdsale. E.g. 7.5million (7500000e18 (~ 7.5M ×10 18  tokens))
 * PERSONAL_CAP - Maximum total amount of tokens that can be bought by an individual during the early crowdsale personal cap period
