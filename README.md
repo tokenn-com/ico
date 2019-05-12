@@ -219,14 +219,17 @@ Destruction - At least 500 days after finalization of the crowdsale, this contra
 The contracts must be deployed in the following order:
 
 * Whitelist has to be deployed manually first. Its address is needed in the next step. Before deploying TokenSale it must be assured that the deployed Whitelist instance is fully functional, i.e.  the owner can add and remove addresses producing Whitelisted status results as expected. The constructor of TokenSale will accept any address as _whitelist parameter, but the  actual  usage  of  Whitelist (that  is  to  check  for  if  an  address  was  whitelisted) doesn’t  happen before the crowdsale period starts.
+* wallet contract which receives ETH and sends a portion of ETH to the Uniswapper must be deployed before TokenSale
 * TokenSale  has  to  be  deployed  manually  after  Whitelist. The following cannot be changed after deployment
 _startTime
 _endTime
 _whitelist
 _wallet
 _rewardWallet
+
 * TOKEN is deployed after TokenSale with TokenSale its owner. One can call the public getter function token() of the crowdsale instance to determine the token’s address.
 * Airdropper requires address and decimals from TOKEN. Allow function is called by owner once Airdropper address created.
+* Uniswapper requires Uniswap Market address which in turn requires the TOKEN smart contract. It must be deployed prior to the start of the crowdsale (during presale phase). Once deployed, its address is sent to _wallet.
 * Locked contracts must be deployed manually before the crowdsale gets finalized. Locked is loosely coupled to the other contracts. It is not essential for the crowdsale or token trading. Any time before crowdsale finalization the crowdsale’s contract owner can decide to replace it by another implementation or even to set a regular user account becoming the crowdsale instance’s Locked address. The contract will start a 365 day retention period on initialization therefore they should be deployed at the last possible moment after the crowdsale has ended and before calling finalize of the crowdsale contract instance.
 
 # Test Cases
