@@ -104,15 +104,12 @@ contract Uniswapper is Ownable {
 
     uint256 public unlockedAt;
     uint256 public canSelfDestruct;
-    uint256 public tokensCreated;
-    uint256 public allocatedTokens;
-    uint256 private UNISWAPPER_SHARE = 37500000e18; // 37.5 mm
 
     TokenToken public token;
-    Exchange public exchange;
+    Exchange   public exchange;
 
     /**
-     * @dev constructor function that sets owner and token for the Uniswapper contract
+     * @dev constructor function that sets token and exchange addresses for the Uniswapper contract
      * @param _token Token contract address for TokenToken
      * @param _exchange UniSwap exchange contract address created manually before for crowdSale token
      */
