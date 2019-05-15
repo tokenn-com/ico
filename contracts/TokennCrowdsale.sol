@@ -352,7 +352,7 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
     }
 
     /**
-     * @dev Mint tokens for pre crowdsale putchases before crowdsale starts
+     * @dev Mint tokens for pre crowdsale purchases before crowdsale starts
      * @param investorsAddress Purchaser's address
      * @param tokensPurchased Tokens purchased during pre crowdsale
      */
@@ -369,7 +369,7 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
 
     /**
      * @dev Set the address which should receive the vested team tokens share on finalization
-     * @param _uniswapper address of team and advisor allocation contract
+     * @param _uniswapper address of team and uniswapper contract
      */
     function setUniswapperAddress(address _uniswapper) public onlyOwner {
         require(_uniswapper != address(0x0));
