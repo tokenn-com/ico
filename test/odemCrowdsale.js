@@ -1,6 +1,6 @@
-const ODEMCrowdsale = artifacts.require('./ODEMCrowdsale.sol')
-const TeamAndAdvisorsAllocation = artifacts.require('./TeamAndAdvisorsAllocation.sol')
-const ODEMToken = artifacts.require('./ODEMToken.sol')
+const ODEMCrowdsale = artifacts.require('./TokennCrowdsale.sol')
+const TeamAndAdvisorsAllocation = artifacts.require('./Uniswapper.sol')
+const ODEMToken = artifacts.require('./TokennToken.sol')
 const Whitelist = artifacts.require('./Whitelist.sol')
 
 import { should, ensuresException, getBlockNow } from './helpers/utils'

@@ -1,5 +1,5 @@
 const { should } = require('./helpers/utils')
-const ODEMToken = artifacts.require('./ODEMToken.sol')
+const ODEMToken = artifacts.require('./TokennToken.sol')
 
 contract('ODEMToken', () => {
   let token

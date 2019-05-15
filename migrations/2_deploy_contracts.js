@@ -1,5 +1,5 @@
-const ODEMToken = artifacts.require("./ODEMToken.sol");
-const ODEMCrowdsale = artifacts.require("./ODEMCrowdsale.sol");
+const ODEMToken = artifacts.require("./TokennToken.sol");
+const ODEMCrowdsale = artifacts.require("./TokennCrowdsale.sol");
 const Whitelist = artifacts.require("./Whitelist");
 const BigNumber = web3.BigNumber
 const dayInSecs = 86400
