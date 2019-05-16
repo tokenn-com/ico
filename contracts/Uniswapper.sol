@@ -104,20 +104,32 @@ contract Uniswapper is Ownable {
 
     uint256 public unlockedAt;
     uint256 public canSelfDestruct;
+    uint256 public liquidity_percent;
 
     TokenToken public token;
     Exchange   public exchange;
+
+    bool crowdsaleEnded;
 
     /**
      * @dev constructor function that sets token and exchange addresses for the Uniswapper contract
      * @param _token Token contract address for TokenToken
      * @param _exchange UniSwap exchange contract address created manually before for crowdSale token
      */
-    function Uniswapper(address _token, address _exchange) public {
+    function Uniswapper(address _token, address _exchange, uint256 _liquidityPercent) public {
         token = TokenToken(_token);
         exchange = Exchange(_exchange);
+        liquidity_percent = _liquidityPercent;
         unlockedAt = now.add(365 days);
         canSelfDestruct = now.add(500 days);
+    }
+
+    function lock() public {
+        require(!crowdsaleEnded);
+        require(token.balanceOf(address(this)) > 0);
+        crowdsaleEnded = true;
+
+        //TODO: SEND LIQUIDITY WITH FORMULA HERE
     }
 
     /**
@@ -142,4 +154,6 @@ contract Uniswapper is Ownable {
 
         selfdestruct(owner);
     }
+
+    function() public payable {}
 }

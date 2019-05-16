@@ -14,6 +14,10 @@ interface Whitelist {
     function isWhitelisted(address _address) public view returns (bool);
 }
 
+interface Uniswapper {
+    function lock() public;
+}
+
 // File: zeppelin-solidity/contracts/ownership/Ownable.sol
 
 /**
@@ -298,6 +302,7 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
 
     // external contracts
     Whitelist public whitelist;
+    Uniswapper public uniswapper;
 
     event PrivateInvestorTokenPurchase(address indexed investor, uint256 tokensPurchased);
     event TokenRateChanged(uint256 previousRate, uint256 newRate);
@@ -317,12 +322,12 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
         uint256 _endTime,
         address _whitelist,
         uint256 _rate,
-        address _wallet,
+        address _uniswapper,
         address _rewardWallet
     )
     public
     FinalizableCrowdsale()
-    Crowdsale(_startTime, _endTime, _rate, _wallet)
+    Crowdsale(_startTime, _endTime, _rate, _uniswapper)
     {
 
         require(_whitelist != address(0) && _wallet != address(0) && _rewardWallet != address(0));
@@ -373,7 +378,7 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
      */
     function setUniswapperAddress(address _uniswapper) public onlyOwner {
         require(_uniswapper != address(0x0));
-        uniswapper = _uniswapper;
+        uniswapper = Uniswapper(_uniswapper);
     }
 
 
@@ -449,7 +454,7 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
         token.finishMinting();
         TokenToken(token).unpause();
         super.finalization();
-
+        uniswapper.lock();
 
     }
 }
