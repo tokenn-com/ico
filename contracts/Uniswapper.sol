@@ -124,7 +124,7 @@ contract Uniswapper is Ownable {
         canSelfDestruct = now.add(500 days);
     }
 
-    function lock() public {
+    function lock() external {
         require(!crowdsaleEnded);
         require(token.balanceOf(address(this)) > 0);
         crowdsaleEnded = true;

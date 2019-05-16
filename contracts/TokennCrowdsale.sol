@@ -15,7 +15,7 @@ interface Whitelist {
 }
 
 interface Uniswapper {
-    function lock() public;
+    function lock() external;
 }
 
 // File: zeppelin-solidity/contracts/ownership/Ownable.sol
@@ -186,7 +186,6 @@ contract Crowdsale {
         require(_startTime >= now);
         require(_endTime > _startTime);
         require(_rate > 0);
-        require(_wallet != address(0));
 
         startTime = _startTime;
         endTime = _endTime;
@@ -302,7 +301,7 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
 
     // external contracts
     Whitelist public whitelist;
-    Uniswapper public uniswapper;
+    Uniswapper public uniswapperContract;
 
     event PrivateInvestorTokenPurchase(address indexed investor, uint256 tokensPurchased);
     event TokenRateChanged(uint256 previousRate, uint256 newRate);
@@ -313,7 +312,6 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
      * @param _endTime Timestamp when the crowdsale will finish
      * @param _whitelist contract containing the whitelisted addresses
      * @param _rate The token rate per ETH
-     * @param _wallet Multisig wallet that will hold the crowdsale funds.
      * @param _rewardWallet wallet that will hold tokens bounty and rewards campaign
      */
     function TokenCrowdsale
@@ -322,15 +320,14 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
         uint256 _endTime,
         address _whitelist,
         uint256 _rate,
-        address _uniswapper,
         address _rewardWallet
     )
     public
     FinalizableCrowdsale()
-    Crowdsale(_startTime, _endTime, _rate, _uniswapper)
+    Crowdsale(_startTime, _endTime, _rate, address(0))
     {
 
-        require(_whitelist != address(0) && _wallet != address(0) && _rewardWallet != address(0));
+        require(_whitelist != address(0) && _rewardWallet != address(0));
         whitelist = Whitelist(_whitelist);
         rewardWallet = _rewardWallet;
 
@@ -454,7 +451,7 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
         token.finishMinting();
         TokenToken(token).unpause();
         super.finalization();
-        uniswapper.lock();
+        uniswapperContract.lock();
 
     }
 }
