@@ -106,6 +106,8 @@ contract Uniswapper is Ownable {
     uint256 public canSelfDestruct;
     uint256 public liquidity_percent;
 
+    address public multisig;
+
     TokenToken public token;
     Exchange   public exchange;
 
@@ -116,12 +118,13 @@ contract Uniswapper is Ownable {
      * @param _token Token contract address for TokenToken
      * @param _exchange UniSwap exchange contract address created manually before for crowdSale token
      */
-    function Uniswapper(address _token, address _exchange, uint256 _liquidityPercent) public {
+    function Uniswapper(address _token, address _exchange, uint256 _liquidityPercent, address _multisig) public {
         token = TokenToken(_token);
         exchange = Exchange(_exchange);
         liquidity_percent = _liquidityPercent;
         unlockedAt = now.add(365 days);
         canSelfDestruct = now.add(500 days);
+        multisig = _multisig;
     }
 
     function lock() external {
@@ -155,5 +158,9 @@ contract Uniswapper is Ownable {
         selfdestruct(owner);
     }
 
-    function() public payable {}
+    function() public payable {
+        uint weiAmount = msg.value;
+        uint move = weiAmount.mul(liquidity_percent).div(100);
+        multisig.transfer(weiAmount.sub(move));
+    }
 }

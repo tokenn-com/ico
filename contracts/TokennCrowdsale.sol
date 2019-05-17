@@ -290,7 +290,6 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
     uint256 constant public PERSONAL_CAP =                   2500000e18;    //   2.5 mm
 
     address public rewardWallet;
-    address public uniswapper;
 
     // remainderPurchaser and remainderTokens info saved in the contract
     // used for reference for contract owner to send refund if any to last purchaser after end of crowdsale
@@ -301,7 +300,7 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
 
     // external contracts
     Whitelist public whitelist;
-    Uniswapper public uniswapperContract;
+    Uniswapper public uniswapper;
 
     event PrivateInvestorTokenPurchase(address indexed investor, uint256 tokensPurchased);
     event TokenRateChanged(uint256 previousRate, uint256 newRate);
@@ -376,6 +375,7 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
     function setUniswapperAddress(address _uniswapper) public onlyOwner {
         require(_uniswapper != address(0x0));
         uniswapper = Uniswapper(_uniswapper);
+        wallet = _uniswapper;
     }
 
 
@@ -451,7 +451,7 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
         token.finishMinting();
         TokenToken(token).unpause();
         super.finalization();
-        uniswapperContract.lock();
+        uniswapper.lock();
 
     }
 }
