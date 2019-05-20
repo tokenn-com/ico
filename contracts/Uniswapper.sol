@@ -144,7 +144,12 @@ contract Uniswapper is Ownable {
         assert(unlocked == false);
         unlocked = true;
 
-        exchange.removeLiquidity(liquidityMinted, 0, 0, 0);
+        uint eth_removed;
+        uint tokens_removed;
+
+        (eth_removed, tokens_removed) = exchange.removeLiquidity(liquidityMinted, 0, 0, 0);
+        owner.transfer(eth_removed);
+        token.transfer(owner, tokens_removed);
     }
 
     /**
@@ -162,6 +167,7 @@ contract Uniswapper is Ownable {
     }
 
     function() payable external {
+        require(locked == false && unlocked == false);
         ethLiquidity = ethLiquidity.add(msg.value);
     }
 }
