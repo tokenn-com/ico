@@ -89,8 +89,8 @@ interface TokenToken {
     function finishMinting() public returns (bool);
 }
 interface Exchange {
-    function addLiquidity(uint min_liquidity, uint max_tokens, uint deadline) public payable returns (uint);
-    function removeLiquidity(uint amount, uint min_eth, uint min_tokens, uint deadline) public returns(uint, uint);
+    function addLiquidity(uint256 min_liquidity, uint256 max_tokens, uint256 deadline) external payable returns (uint256);
+    function removeLiquidity(uint256 amount, uint256 min_eth, uint256 min_tokens, uint256 deadline) external returns (uint256, uint256);
 }
 
 // File: contracts/Uniswapper.sol
@@ -104,35 +104,36 @@ contract Uniswapper is Ownable {
 
     uint256 public unlockedAt;
     uint256 public canSelfDestruct;
-    uint256 public liquidity_percent;
-
-    address public multisig;
+    uint256 public liquidityMinted;
+    uint256 public ethLiquidity;
+    uint256 public rate;
 
     TokenToken public token;
     Exchange   public exchange;
 
-    bool crowdsaleEnded;
+    bool locked;
+    bool unlocked;
 
     /**
      * @dev constructor function that sets token and exchange addresses for the Uniswapper contract
      * @param _token Token contract address for TokenToken
      * @param _exchange UniSwap exchange contract address created manually before for crowdSale token
      */
-    function Uniswapper(address _token, address _exchange, uint256 _liquidityPercent, address _multisig) public {
+    function Uniswapper(address _token, address _exchange, uint _rate) public {
         token = TokenToken(_token);
         exchange = Exchange(_exchange);
-        liquidity_percent = _liquidityPercent;
         unlockedAt = now.add(365 days);
         canSelfDestruct = now.add(500 days);
-        multisig = _multisig;
+        rate = _rate;
     }
 
     function lock() external {
-        require(!crowdsaleEnded);
+        require(locked == false);
         require(token.balanceOf(address(this)) > 0);
-        crowdsaleEnded = true;
+        locked = true;
 
-        //TODO: SEND LIQUIDITY WITH FORMULA HERE
+        uint max_tokens = token.balanceOf(address(this)) / rate;
+        liquidityMinted = exchange.addLiquidity.value(address(this).balance)(0, max_tokens, 0);
     }
 
     /**
@@ -140,8 +141,10 @@ contract Uniswapper is Ownable {
      */
     function unlock() public onlyOwner {
         assert(now >= unlockedAt);
+        assert(unlocked == false);
+        unlocked = true;
 
-        //TODO: RETURNING LIQUIDITY HERE
+        exchange.removeLiquidity(liquidityMinted, 0, 0, 0);
     }
 
     /**
@@ -158,9 +161,7 @@ contract Uniswapper is Ownable {
         selfdestruct(owner);
     }
 
-    function() public payable {
-        uint weiAmount = msg.value;
-        uint move = weiAmount.mul(liquidity_percent).div(100);
-        multisig.transfer(weiAmount.sub(move));
+    function() payable external {
+        ethLiquidity = ethLiquidity.add(msg.value);
     }
 }

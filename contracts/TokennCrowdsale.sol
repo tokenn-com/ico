@@ -290,17 +290,22 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
     uint256 constant public PERSONAL_CAP =                   2500000e18;    //   2.5 mm
 
     address public rewardWallet;
+    address public multisig;
 
     // remainderPurchaser and remainderTokens info saved in the contract
     // used for reference for contract owner to send refund if any to last purchaser after end of crowdsale
     address public remainderPurchaser;
     uint256 public remainderAmount;
+    uint256 public liquirityPercent;
+
+    bool public uniswapperSet;
 
     mapping (address => uint256) public trackBuyersPurchases;
 
     // external contracts
     Whitelist public whitelist;
     Uniswapper public uniswapper;
+    address public uniswapperAddress;
 
     event PrivateInvestorTokenPurchase(address indexed investor, uint256 tokensPurchased);
     event TokenRateChanged(uint256 previousRate, uint256 newRate);
@@ -311,6 +316,7 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
      * @param _endTime Timestamp when the crowdsale will finish
      * @param _whitelist contract containing the whitelisted addresses
      * @param _rate The token rate per ETH
+     * @param _multisig The multisignature wallet to store ETH
      * @param _rewardWallet wallet that will hold tokens bounty and rewards campaign
      */
     function TokenCrowdsale
@@ -319,16 +325,19 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
         uint256 _endTime,
         address _whitelist,
         uint256 _rate,
-        address _rewardWallet
+        address _multisig,
+        address _rewardWallet,
+        uint256 _liquidityPercent
     )
     public
     FinalizableCrowdsale()
-    Crowdsale(_startTime, _endTime, _rate, address(0))
+    Crowdsale(_startTime, _endTime, _rate, _multisig)
     {
 
-        require(_whitelist != address(0) && _rewardWallet != address(0));
+        require(_whitelist != address(0) && _multisig != address(0) && _rewardWallet != address(0));
         whitelist = Whitelist(_whitelist);
         rewardWallet = _rewardWallet;
+        liquirityPercent = _liquidityPercent;
 
     }
 
@@ -374,8 +383,10 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
      */
     function setUniswapperAddress(address _uniswapper) public onlyOwner {
         require(_uniswapper != address(0x0));
+        require(uniswapperSet == false);
+        uniswapperSet = true;
         uniswapper = Uniswapper(_uniswapper);
-        wallet = _uniswapper;
+        uniswapperAddress = _uniswapper;
     }
 
 
@@ -419,6 +430,15 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
         emit TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
 
         forwardFunds();
+    }
+
+    // overriding forwardFunds to add dividing logic
+    function forwardFunds() internal {
+        uint weiAmount = msg.value;
+        uint keepAmount = weiAmount.mul(liquirityPercent).div(100);
+        uint sendAmount = weiAmount.sub(keepAmount);
+        wallet.transfer(keepAmount);
+        uniswapperAddress.transfer(sendAmount);
     }
 
     // overriding Crowdsale#hasEnded to add cap logic
