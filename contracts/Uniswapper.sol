@@ -107,6 +107,8 @@ contract Uniswapper is Ownable {
     uint256 public liquidityMinted;
     uint256 public ethLiquidity;
     uint256 public rate;
+    uint256 public tokenSent;
+    uint256 public ethSent;
 
     TokenToken public token;
     Exchange   public exchange;
@@ -132,8 +134,10 @@ contract Uniswapper is Ownable {
         require(token.balanceOf(address(this)) > 0);
         locked = true;
 
-        uint max_tokens = token.balanceOf(address(this)) / rate;
-        liquidityMinted = exchange.addLiquidity.value(address(this).balance)(0, max_tokens, 0);
+        tokenSent = token.balanceOf(address(this)) / rate;
+        ethSent = address(this).balance;
+
+        liquidityMinted = exchange.addLiquidity.value(ethSent)(0, tokenSent, now + 1 hours);
     }
 
     /**
@@ -147,7 +151,7 @@ contract Uniswapper is Ownable {
         uint eth_removed;
         uint tokens_removed;
 
-        (eth_removed, tokens_removed) = exchange.removeLiquidity(liquidityMinted, 0, 0, 0);
+        (eth_removed, tokens_removed) = exchange.removeLiquidity(liquidityMinted, ethSent, tokenSent, now + 1 hours);
         owner.transfer(eth_removed);
         token.transfer(owner, tokens_removed);
     }
