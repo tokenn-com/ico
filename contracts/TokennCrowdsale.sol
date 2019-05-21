@@ -453,16 +453,16 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
      */
     function finalization() internal {
         // This must have been set manually prior to finalize().
-        require(uniswapper != address(0x0));
+        require(address(uniswapper) != address(0x0));
 
         // final minting
-        token.mint(uniswapper, UNISWAPPER_SHARE);
+        token.mint(address(uniswapper), UNISWAPPER_SHARE);
         token.mint(rewardWallet, REWARD_SHARE);
 
         if (TOTAL_TOKENS_SUPPLY > token.getTotalSupply()) {
             uint256 remainingTokens = TOTAL_TOKENS_SUPPLY.sub(token.getTotalSupply());
 
-            token.mint(wallet, remainingTokens);
+            token.mint(address(wallet), remainingTokens);
         }
 
         token.finishMinting();
