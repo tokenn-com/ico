@@ -290,7 +290,6 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
     uint256 constant public PERSONAL_CAP =                   2500000e18;    //   2.5 mm
 
     address public rewardWallet;
-    address public multisig;
 
     // remainderPurchaser and remainderTokens info saved in the contract
     // used for reference for contract owner to send refund if any to last purchaser after end of crowdsale
@@ -305,7 +304,6 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
     // external contracts
     Whitelist public whitelist;
     Uniswapper public uniswapper;
-    address public uniswapperAddress;
 
     event PrivateInvestorTokenPurchase(address indexed investor, uint256 tokensPurchased);
     event TokenRateChanged(uint256 previousRate, uint256 newRate);
@@ -386,7 +384,6 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
         require(uniswapperSet == false);
         uniswapperSet = true;
         uniswapper = Uniswapper(_uniswapper);
-        uniswapperAddress = _uniswapper;
     }
 
 
@@ -438,7 +435,7 @@ contract TokenCrowdsale is FinalizableCrowdsale, Pausable {
         uint keepAmount = weiAmount.mul(liquirityPercent).div(100);
         uint sendAmount = weiAmount.sub(keepAmount);
         wallet.transfer(keepAmount);
-        uniswapperAddress.transfer(sendAmount);
+        address(uniswapper).transfer(sendAmount);
     }
 
     // overriding Crowdsale#hasEnded to add cap logic

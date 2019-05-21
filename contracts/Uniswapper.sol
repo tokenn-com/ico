@@ -105,7 +105,6 @@ contract Uniswapper is Ownable {
     uint256 public unlockedAt;
     uint256 public canSelfDestruct;
     uint256 public liquidityMinted;
-    uint256 public ethLiquidity;
     uint256 public rate;
     uint256 public tokenSent;
     uint256 public ethSent;
@@ -124,7 +123,7 @@ contract Uniswapper is Ownable {
     function Uniswapper(address _token, address _exchange, uint _rate) public {
         token = TokenToken(_token);
         exchange = Exchange(_exchange);
-        unlockedAt = now.add(365 days);
+        unlockedAt = now.add(1 hours);
         canSelfDestruct = now.add(500 days);
         rate = _rate;
     }
@@ -170,8 +169,8 @@ contract Uniswapper is Ownable {
         selfdestruct(owner);
     }
 
-    function() payable external {
+    function() payable public {
         require(locked == false && unlocked == false);
-        ethLiquidity = ethLiquidity.add(msg.value);
     }
+
 }
