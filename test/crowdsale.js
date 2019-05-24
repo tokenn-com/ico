@@ -9,9 +9,9 @@ let Crowdsale = artifacts.require('./TokennCrowdsale.sol');
 
 contract('Crowdsale', async accounts => {
     let day = 86400;
-    let crowdsalePeriod = day;
+    let crowdsalePeriod = 10 * day;
 
-    let start = parseInt(new Date().getTime() / 1000); // now + 1 minute
+    let start = parseInt(new Date().getTime() / 1000) + 600; // now + 10 minute
     let end = start + crowdsalePeriod;
     let tokenBuyRate = 1;
     let liquidityPercent = 20;
@@ -26,15 +26,11 @@ contract('Crowdsale', async accounts => {
         whitelist = await Whitelist.new();
         multisig = await MultiSig.new();
 
-        console.log(start);
-        console.log(end);
-        crowdsale = await Crowdsale.new.call(start, end, whitelist.address, tokenBuyRate, multisig.address, accounts[0], liquidityPercent);
+        crowdsale = await Crowdsale.new(start, end, whitelist.address, tokenBuyRate, multisig.address, accounts[0], liquidityPercent);
+        token = await Token.new(crowdsale.address);
 
-        // token = await Token.new(crowdsale.address);
+        await crowdsale.setTokenContractAddress(token.address);
 
-        // console.log(await crowdsale.token);
-
-        // await crowdsale.setTokenContractAddress(token.address, {from: accounts[0]});
     });
 
     it('should deploy crodwsale', async () => {});
