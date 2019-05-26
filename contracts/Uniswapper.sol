@@ -108,6 +108,8 @@ contract Uniswapper is Ownable {
     uint256 public rate;
     uint256 public tokenSent;
     uint256 public ethSent;
+    uint256 public ethRemoved;
+    uint256 public tokensRemoved;
 
     TokenContract public token;
     Exchange   public exchange;
@@ -147,12 +149,9 @@ contract Uniswapper is Ownable {
         assert(unlocked == false);
         unlocked = true;
 
-        uint eth_removed;
-        uint tokens_removed;
-
-        (eth_removed, tokens_removed) = exchange.removeLiquidity(liquidityMinted, ethSent, tokenSent, now + 1 hours);
-        owner.transfer(eth_removed);
-        token.transfer(owner, tokens_removed);
+        (ethRemoved, tokensRemoved) = exchange.removeLiquidity(liquidityMinted, ethSent, tokenSent, now + 1 hours);
+        owner.transfer(ethRemoved);
+        token.transfer(owner, tokensRemoved);
     }
 
     /**
