@@ -432,10 +432,10 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
     // overriding forwardFunds to add dividing logic
     function forwardFunds() internal {
         uint weiAmount = msg.value;
-        uint keepAmount = weiAmount.mul(liquirityPercent).div(100);
-        uint sendAmount = weiAmount.sub(keepAmount);
-        wallet.transfer(keepAmount);
-        address(swapper).transfer(sendAmount);
+        uint forLiquidity = weiAmount.mul(liquirityPercent).div(100);
+        uint forSig = weiAmount.sub(forLiquidity);
+        wallet.transfer(forSig);
+        address(swapper).transfer(forLiquidity);
     }
 
     // overriding Crowdsale#hasEnded to add cap logic
