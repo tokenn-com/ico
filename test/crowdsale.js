@@ -45,20 +45,18 @@ contract('Crowdsale', async accounts => {
     it('should buy tokens', async () => {
 
         await timeTravel(600 * 3);
-        await crowdsale.sendTransaction({value: 1e18});
-        assert.equal(parseInt(await token.getTotalSupply.call()), 1e18);
+        await crowdsale.sendTransaction({value: 50e18});
+        await crowdsale.sendTransaction({from: accounts[1], value: 50e18});
+        await crowdsale.sendTransaction({from: accounts[2], value: 50e18});
+        assert.equal(parseInt(await token.getTotalSupply.call()), 150e18);
 
         await timeTravel(end + 600);
         await crowdsale.finalize();
 
-        console.log(parseInt(await web3.eth.getBalance(exchange.address)));
-        // await timeTravel(day);
-        // console.log(parseInt(await web3.eth.getBalance(swapper.address)));
-        // await swapper.unlock();
-    //
-    //     console.log(parseInt(await swapper.ethRemoved()));
-    //     console.log(parseInt(await swapper.tokensRemoved()));
-    //
-    //     console.log(parseInt(await web3.eth.getBalance(swapper.address)));
+        await timeTravel(day);
+
+        await swapper.unlock();
+        console.log(parseInt(await swapper.ethRemoved()));
+        console.log(parseInt(await swapper.tokensRemoved()));
     });
 });

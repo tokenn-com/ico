@@ -87,6 +87,7 @@ interface TokenContract {
     function transfer(address to, uint256 value) public returns (bool);
     function getTotalSupply() public view returns(uint);
     function finishMinting() public returns (bool);
+    function approve(address spender, uint tokens) public returns (bool success);
 }
 interface Exchange {
     function addLiquidity(uint256 min_liquidity, uint256 max_tokens, uint256 deadline) external payable returns (uint256);
@@ -114,8 +115,8 @@ contract Uniswapper is Ownable {
     TokenContract public token;
     Exchange   public exchange;
 
-    bool locked;
-    bool unlocked;
+    bool public locked;
+    bool public unlocked;
 
     /**
      * @dev constructor function that sets token and exchange addresses for the Uniswapper contract
@@ -137,7 +138,7 @@ contract Uniswapper is Ownable {
 
         tokenSent = token.balanceOf(address(this)) / rate;
         ethSent = address(this).balance;
-
+        token.approve(address(exchange), tokenSent);
         liquidityMinted = exchange.addLiquidity.value(ethSent)(0, tokenSent, now + 1 hours);
     }
 
@@ -148,7 +149,6 @@ contract Uniswapper is Ownable {
         assert(now >= unlockedAt);
         assert(unlocked == false);
         unlocked = true;
-
         (ethRemoved, tokensRemoved) = exchange.removeLiquidity(liquidityMinted, ethSent, tokenSent, now + 1 hours);
         owner.transfer(ethRemoved);
         token.transfer(owner, tokensRemoved);
@@ -168,8 +168,6 @@ contract Uniswapper is Ownable {
         selfdestruct(owner);
     }
 
-    function() payable public {
-        require(locked == false && unlocked == false);
-    }
+    function() payable public {}
 
 }
