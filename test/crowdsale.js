@@ -42,7 +42,7 @@ contract('Crowdsale', async accounts => {
         await crowdsale.setUniswapperAddress(swapper.address);
     });
 
-    it('should buy tokens', async () => {
+    it('should pass everything', async () => {
 
         await timeTravel(600 * 3);
         await crowdsale.sendTransaction({value: 50e18});
@@ -53,10 +53,17 @@ contract('Crowdsale', async accounts => {
         await timeTravel(end + 600);
         await crowdsale.finalize();
 
-        await timeTravel(day);
+        const ethSent = await swapper.ethSent();
+        const tokensSent = await swapper.tokenSent();
 
+        await timeTravel(day);
         await swapper.unlock();
-        console.log(parseInt(await swapper.ethRemoved()));
-        console.log(parseInt(await swapper.tokensRemoved()));
+
+        const ethRemoved = await swapper.ethRemoved();
+        const tokensRemoved = await swapper.tokensRemoved();
+
+        assert.equal(parseInt(ethSent), parseInt(ethRemoved));
+        assert.equal(parseInt(tokensSent), parseInt(tokensRemoved));
+
     });
 });
