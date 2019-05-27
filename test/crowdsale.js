@@ -43,19 +43,24 @@ contract('Crowdsale', async accounts => {
     });
 
     it('should pass everything', async () => {
-
+        // starting crowdsale...
         await timeTravel(600 * 3);
+
+        // buying tokens...
         await crowdsale.sendTransaction({value: 50e18});
         await crowdsale.sendTransaction({from: accounts[1], value: 50e18});
         await crowdsale.sendTransaction({from: accounts[2], value: 50e18});
+
         assert.equal(parseInt(await token.getTotalSupply.call()), 150e18);
 
+        // ending crowdsale with sending tokens and ether to uniswap exchange
         await timeTravel(end + 600);
         await crowdsale.finalize();
 
         const ethSent = await swapper.ethSent();
         const tokensSent = await swapper.tokenSent();
 
+        // unlocking liquidity after certain period of time
         await timeTravel(day);
         await swapper.unlock();
 
