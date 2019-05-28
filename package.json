@@ -15,5 +15,8 @@
   },
   "author": "",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/aemet/crowdsale#readme"
+  "homepage": "https://bitbucket.org/aemet/crowdsale#readme",
+  "dependencies": {
+    "truffle-hdwallet-provider": "^1.0.9"
+  }
 }
