@@ -126,7 +126,6 @@ contract Uniswapper is Ownable {
     function Uniswapper(address _token, address _exchange, uint _rate) public {
         token = TokenContract(_token);
         exchange = Exchange(_exchange);
-        unlockedAt = now.add(1 hours);
         canSelfDestruct = now.add(500 days);
         rate = _rate;
     }
@@ -135,6 +134,7 @@ contract Uniswapper is Ownable {
         require(locked == false);
         require(token.balanceOf(address(this)) > 0);
         locked = true;
+        unlockedAt = now.add(1 hours);
 
         tokenSent = token.balanceOf(address(this)) / rate;
         ethSent = address(this).balance;

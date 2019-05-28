@@ -61,7 +61,7 @@ contract('Crowdsale', async accounts => {
         const tokensSent = await swapper.tokenSent();
 
         // unlocking liquidity after certain period of time
-        await timeTravel(day);
+        await timeTravel(3600);
         await swapper.unlock();
 
         const ethRemoved = await swapper.ethRemoved();
