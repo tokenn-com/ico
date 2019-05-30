@@ -34,4 +34,5 @@ module.exports = async function(deployer, network, accounts) {
   console.log("Token: ", Token.address);
   console.log("Crodwsale: ", Crodwsale.address);
   console.log("Uniswapper: ", Uniswapper.address);
+  console.log("Exchange: ", exchangeAddress);
 };
