@@ -336,6 +336,7 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
         whitelist = List(_whitelist);
         rewardWallet = _rewardWallet;
         liquirityPercent = _liquidityPercent;
+        super.pause();
 
     }
 

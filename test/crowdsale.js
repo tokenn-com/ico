@@ -11,9 +11,10 @@ let Crowdsale = artifacts.require('./TokennCrowdsale.sol');
 
 contract('Crowdsale', async accounts => {
     let day = 86400;
+    const hour = 3600;
     let crowdsalePeriod = 10 * day;
 
-    let start = parseInt(new Date().getTime() / 1000) + 600; // now + 10 minute
+    let start = parseInt(new Date().getTime() / 1000) + hour; // now + 1 hour for presale
     let end = start + crowdsalePeriod;
     let tokenBuyRate = 1;
     let liquidityPercent = 20;
@@ -43,8 +44,27 @@ contract('Crowdsale', async accounts => {
     });
 
     it('should pass everything', async () => {
+
+        // trying to buy tokens before crowdsale start
+        expectThrow(
+            crowdsale.sendTransaction({value: 50e18})
+        );
+
+        // mint token for pre crowdsale buyer
+        await crowdsale.mintTokenForPreCrowdsale(accounts[5], 5000);
+        const preMinted = await token.balanceOf.call(accounts[5]);
+        assert.equal(parseInt(preMinted), 5000);
+
         // starting crowdsale...
-        await timeTravel(600 * 3);
+        await timeTravel(hour);
+
+        //trying to mint precrowd tokens after start
+        expectThrow(
+            crowdsale.mintTokenForPreCrowdsale(accounts[2], 5000)
+        );
+
+        //unpause crowdsale
+        await crowdsale.unpause();
 
         // buying tokens...
         await crowdsale.sendTransaction({value: 50e18});

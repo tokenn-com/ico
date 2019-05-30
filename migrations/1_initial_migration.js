@@ -11,7 +11,7 @@ const factoryContract = new web3.eth.Contract(FACTORY_ABI, FACTORY_ADDRESS);
 
 module.exports = async function(deployer, network, accounts) {
   const hour = 3600;
-  const startTime = parseInt(new Date().getTime() / 1000) + 600; // now + 10 minute
+  const startTime = parseInt(new Date().getTime() / 1000) + hour; // now + 1 hour for presale
   const endTime = startTime + hour;
   const buyRate = 1;
   const rewardWallet = accounts[0];
