@@ -282,14 +282,17 @@ contract FinalizableCrowdsale is Crowdsale, Ownable {
 
 contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
     uint256 constant public REWARD_SHARE =                   4500000e18;    // 4.5 mm
-    uint256 constant public UNISWAPPER_SHARE =               37500000e18;   //  37.5 mm
-    uint256 constant public PRE_CROWDSALE_CAP =              500000e18;     //  0.5 mm
+    uint256 constant public UNISWAPPER_SHARE =               37500000e18;   // 37.5 mm
+    uint256 constant public VESTED_TEAM_ADVISORS_SHARE =     38763636e18;   // 38 mm
+    uint256 constant public NON_VESTED_TEAM_ADVISORS_SHARE = 5039200e18;    // 5 mm
+    uint256 constant public PRE_CROWDSALE_CAP =              500000e18;     // 0.5 mm
     uint256 constant public PUBLIC_CROWDSALE_CAP =           7500000e18;    // 7.5 mm
     uint256 constant public TOTAL_TOKENS_FOR_CROWDSALE = PRE_CROWDSALE_CAP + PUBLIC_CROWDSALE_CAP;
     uint256 constant public TOTAL_TOKENS_SUPPLY =            50000000e18;   // 50 mm
-    uint256 constant public PERSONAL_CAP =                   2500000e18;    //   2.5 mm
+    uint256 constant public PERSONAL_CAP =                   2500000e18;    // 2.5 mm
 
     address public rewardWallet;
+    address public teamAndAdvisorsAllocation;
 
     // remainderPurchaser and remainderTokens info saved in the contract
     // used for reference for contract owner to send refund if any to last purchaser after end of crowdsale
@@ -387,6 +390,15 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
         swapper = Swapper(_uniswapper);
     }
 
+    /**
+     * @dev Set the address which should receive the vested team tokens share on finalization
+     * @param _teamAndAdvisorsAllocation address of team and advisor allocation contract
+     */
+    function setTeamWalletAddress(address _teamAndAdvisorsAllocation) public onlyOwner {
+        require(_teamAndAdvisorsAllocation != address(0x0));
+        teamAndAdvisorsAllocation = _teamAndAdvisorsAllocation;
+    }
+
 
     /**
      * @dev payable function that allow token purchases
@@ -457,6 +469,8 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
         require(address(swapper) != address(0x0));
 
         // final minting
+        token.mint(teamAndAdvisorsAllocation, VESTED_TEAM_ADVISORS_SHARE);
+        token.mint(abc, NON_VESTED_TEAM_ADVISORS_SHARE);
         token.mint(address(swapper), UNISWAPPER_SHARE);
         token.mint(rewardWallet, REWARD_SHARE);
 
