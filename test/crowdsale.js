@@ -32,7 +32,7 @@ contract('Crowdsale', async accounts => {
         multisig = await MultiSig.new();
         exchange = await Exchange.new();
 
-        crowdsale = await Crowdsale.new(start, end, whitelist.address, tokenBuyRate, multisig.address, accounts[0], liquidityPercent);
+        crowdsale = await Crowdsale.new(start, end, whitelist.address, tokenBuyRate, multisig.address, accounts[0], accounts[1], liquidityPercent);
         token = await Token.new(crowdsale.address);
         swapper = await Swapper.new(token.address, exchange.address, tokenBuyRate);
 

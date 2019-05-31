@@ -15,11 +15,14 @@ module.exports = async function(deployer, network, accounts) {
   const endTime = startTime + hour;
   const buyRate = 1;
   const rewardWallet = accounts[0];
+  const nonVestedWallet = accounts[0];
+
   const liquidityPercent = 20;
 
   await deployer.deploy(WhiteList);
   await deployer.deploy(Multisig);
-  const cs = await deployer.deploy(Crodwsale, startTime, endTime, WhiteList.address, buyRate, Multisig.address, rewardWallet, liquidityPercent);
+  const cs = await deployer.deploy(Crodwsale, startTime, endTime,
+      WhiteList.address, buyRate, Multisig.address, rewardWallet, nonVestedWallet, liquidityPercent);
   await deployer.deploy(Token, Crodwsale.address);
 
   await factoryContract.methods.createExchange(Token.address).send({from: accounts[0]});
