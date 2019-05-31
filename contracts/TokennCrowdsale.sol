@@ -293,6 +293,7 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
 
     address public rewardWallet;
     address public teamAndAdvisorsAllocation;
+    address public nonVestedWallet;
 
     // remainderPurchaser and remainderTokens info saved in the contract
     // used for reference for contract owner to send refund if any to last purchaser after end of crowdsale
@@ -328,6 +329,7 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
         uint256 _rate,
         address _multisig,
         address _rewardWallet,
+        address _nonVestedWallet,
         uint256 _liquidityPercent
     )
     public
@@ -335,9 +337,10 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
     Crowdsale(_startTime, _endTime, _rate, _multisig)
     {
 
-        require(_whitelist != address(0) && _multisig != address(0) && _rewardWallet != address(0));
+        require(_whitelist != address(0) && _multisig != address(0) && _rewardWallet != address(0) && _nonVestedWallet != address(0));
         whitelist = List(_whitelist);
         rewardWallet = _rewardWallet;
+        nonVestedWallet = _nonVestedWallet;
         liquirityPercent = _liquidityPercent;
         super.pause();
 
@@ -470,7 +473,7 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
 
         // final minting
         token.mint(teamAndAdvisorsAllocation, VESTED_TEAM_ADVISORS_SHARE);
-        token.mint(abc, NON_VESTED_TEAM_ADVISORS_SHARE);
+        token.mint(nonVestedWallet, NON_VESTED_TEAM_ADVISORS_SHARE);
         token.mint(address(swapper), UNISWAPPER_SHARE);
         token.mint(rewardWallet, REWARD_SHARE);
 
