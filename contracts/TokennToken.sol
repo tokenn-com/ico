@@ -357,8 +357,8 @@ contract PausableToken is StandardToken, Pausable {
  */
 
 contract TokennToken is PausableToken, MintableToken {
-    string public constant name = "TOKEN";
-    string public constant symbol = "TON";
+    string public constant name = "test-CM0";
+    string public constant symbol = "test-CM0";
     uint8 public constant decimals = 18;
 
     function TokennToken(address _crowdsaleContract) public {

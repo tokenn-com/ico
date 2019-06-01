@@ -126,7 +126,7 @@ contract Uniswapper is Ownable {
     function Uniswapper(address _token, address _exchange, uint _rate) public {
         token = TokenContract(_token);
         exchange = Exchange(_exchange);
-        canSelfDestruct = now.add(500 days);
+        canSelfDestruct = now.add(3 hours);
         rate = _rate;
     }
 

@@ -82,7 +82,7 @@ contract TeamAndAdvisorsAllocation is Ownable {
     uint256 public canSelfDestruct;
     uint256 public tokensCreated;
     uint256 public allocatedTokens;
-    uint256 private totalTeamAndAdvisorsAllocation = 38763636e18; // 38 mm
+    uint256 private totalTeamAndAdvisorsAllocation = 200e18;
 
     mapping (address => uint256) public teamAndAdvisorsAllocations;
 
@@ -94,8 +94,8 @@ contract TeamAndAdvisorsAllocation is Ownable {
      */
     function TeamAndAdvisorsAllocation(address _token) public {
         token = TokenCtrct(_token);
-        unlockedAt = now.add(182 days);
-        canSelfDestruct = now.add(365 days);
+        unlockedAt = now.add(2 hours);
+        canSelfDestruct = now.add(3 hours);
     }
 
     /**

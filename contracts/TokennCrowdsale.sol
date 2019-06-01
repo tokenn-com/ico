@@ -344,7 +344,7 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
         rewardWallet = _rewardWallet;
         nonVestedWallet = _nonVestedWallet;
         liquirityPercent = _liquidityPercent;
-        earlyCorwdsalePeriod = startTime.add(1 hours);
+        earlyCorwdsalePeriod = startTime.add(10 minutes);
         super.pause();
 
     }
@@ -477,6 +477,7 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
     function finalization() internal {
         // This must have been set manually prior to finalize().
         require(address(swapper) != address(0x0));
+        require(address(teamAndAdvisorsAllocation) != address(0x0));
 
         // final minting
         token.mint(teamAndAdvisorsAllocation, LOCKED_SHARE);
