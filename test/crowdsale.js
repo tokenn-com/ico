@@ -11,21 +11,23 @@ const TAA = artifacts.require('./TeamAndAdvisorsAllocation.sol');
 const Crowdsale = artifacts.require('./TokennCrowdsale.sol');
 
 contract('Crowdsale', async accounts => {
-    let day = 86400;
+    const day = 86400;
     const hour = 3600;
-    let crowdsalePeriod = 10 * day;
+    const crowdsalePeriod = 10 * day;
 
-    let start = parseInt(new Date().getTime() / 1000) + hour; // now + 1 hour for presale
-    let end = start + crowdsalePeriod;
-    let tokenBuyRate = 1;
-    let liquidityPercent = 20;
+    const start = parseInt(new Date().getTime() / 1000) + hour; // now + 1 hour for presale
+    const end = start + crowdsalePeriod;
+    const tokenBuyRate = 1;
+    const liquidityPercent = 20;
+
+    const rewardWallet = accounts[1];
+    const nonVestedWallet = accounts[2];
 
     let whitelist;
     let multisig;
     let token;
     let swapper;
     let taa;
-
     let crowdsale;
     let exchange;
 
@@ -34,7 +36,7 @@ contract('Crowdsale', async accounts => {
         multisig = await MultiSig.new();
         exchange = await Exchange.new();
 
-        crowdsale = await Crowdsale.new(start, end, whitelist.address, tokenBuyRate, multisig.address, accounts[0], accounts[1], liquidityPercent);
+        crowdsale = await Crowdsale.new(start, end, whitelist.address, tokenBuyRate, multisig.address, rewardWallet, nonVestedWallet, liquidityPercent);
         token = await Token.new(crowdsale.address);
         swapper = await Swapper.new(token.address, exchange.address, tokenBuyRate);
         taa = await TAA.new(token.address);

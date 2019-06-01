@@ -82,7 +82,7 @@ contract TeamAndAdvisorsAllocation is Ownable {
     uint256 public canSelfDestruct;
     uint256 public tokensCreated;
     uint256 public allocatedTokens;
-    uint256 private totalTeamAndAdvisorsAllocation = 200e18;
+    uint256 private totalTeamAndAdvisorsAllocation = 300e18;
 
     mapping (address => uint256) public teamAndAdvisorsAllocations;
 
