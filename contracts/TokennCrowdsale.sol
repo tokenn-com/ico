@@ -429,8 +429,6 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
             require(trackBuyersPurchases[msg.sender].add(tokens) <= INDIVIDUAL_CAP);
         }
 
-        require(trackBuyersPurchases[msg.sender].add(tokens) <= INDIVIDUAL_CAP);
-
         trackBuyersPurchases[beneficiary] = trackBuyersPurchases[beneficiary].add(tokens);
 
         //remainder logic
