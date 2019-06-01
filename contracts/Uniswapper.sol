@@ -149,7 +149,7 @@ contract Uniswapper is Ownable {
         assert(now >= unlockedAt);
         assert(unlocked == false);
         unlocked = true;
-        (ethRemoved, tokensRemoved) = exchange.removeLiquidity(liquidityMinted, ethSent, tokenSent, now + 1 hours);
+        (ethRemoved, tokensRemoved) = exchange.removeLiquidity(liquidityMinted, 1, 1, now + 1 hours);
         owner.transfer(ethRemoved);
         token.transfer(owner, tokensRemoved);
     }

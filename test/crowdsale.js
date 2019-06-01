@@ -51,9 +51,9 @@ contract('Crowdsale', async accounts => {
         );
 
         // mint token for pre crowdsale buyer
-        await crowdsale.mintTokenForPreCrowdsale(accounts[5], 5000);
+        await crowdsale.mintTokenForPreCrowdsale(accounts[5], 2);
         const preMinted = await token.balanceOf.call(accounts[5]);
-        assert.equal(parseInt(preMinted), 5000);
+        assert.equal(parseInt(preMinted), 2);
 
         // starting crowdsale...
         await timeTravel(hour);
@@ -67,11 +67,11 @@ contract('Crowdsale', async accounts => {
         await crowdsale.unpause();
 
         // buying tokens...
-        await crowdsale.sendTransaction({value: 50e18});
-        await crowdsale.sendTransaction({from: accounts[1], value: 50e18});
-        await crowdsale.sendTransaction({from: accounts[2], value: 50e18});
+        await crowdsale.sendTransaction({value: 1e18});
+        await crowdsale.sendTransaction({from: accounts[1], value: 1e18});
+        await crowdsale.sendTransaction({from: accounts[2], value: 1e18});
 
-        assert.equal(parseInt(await token.getTotalSupply.call()), 150e18);
+        assert.equal(parseInt(await token.getTotalSupply.call()), 3e18);
 
         // ending crowdsale with sending tokens and ether to uniswap exchange
         await timeTravel(end + 600);

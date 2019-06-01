@@ -281,19 +281,21 @@ contract FinalizableCrowdsale is Crowdsale, Ownable {
  */
 
 contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
-    uint256 constant public REWARD_SHARE =                   4500000e18;    // 4.5 mm
-    uint256 constant public UNISWAPPER_SHARE =               37500000e18;   // 37.5 mm
-    uint256 constant public VESTED_TEAM_ADVISORS_SHARE =     38763636e18;   // 38 mm
-    uint256 constant public NON_VESTED_TEAM_ADVISORS_SHARE = 5039200e18;    // 5 mm
-    uint256 constant public PRE_CROWDSALE_CAP =              500000e18;     // 0.5 mm
-    uint256 constant public PUBLIC_CROWDSALE_CAP =           7500000e18;    // 7.5 mm
-    uint256 constant public TOTAL_TOKENS_FOR_CROWDSALE = PRE_CROWDSALE_CAP + PUBLIC_CROWDSALE_CAP;
-    uint256 constant public TOTAL_TOKENS_SUPPLY =            50000000e18;   // 50 mm
-    uint256 constant public PERSONAL_CAP =                   2500000e18;    // 2.5 mm
+    uint256 constant public REWARD_SHARE    =                 100e18;
+    uint256 constant public UNISWAP_SHARE   =                 500e18;
+    uint256 constant public UNLOCKED_SHARE  =                 200e18;
+    uint256 constant public LOCKED_SHARE    =                 300e18;
+    uint256 constant public PRESALE_CAP     =                 200e18;
+    uint256 constant public CROWDSALE_CAP   =                 1000e18;
+    uint256 constant public TOTAL_SUPPLY    =                 2500e18;
+    uint256 constant public INDIVIDUAL_CAP  =                 2e18;
+    uint256 constant public COMPANY_SHARE   =                 200e18;
+    uint256 constant public TOTAL_TOKENS_FOR_TOKENSALE = PRESALE_CAP + CROWDSALE_CAP;
 
     address public rewardWallet;
     address public teamAndAdvisorsAllocation;
     address public nonVestedWallet;
+    uint256 public earlyCorwdsalePeriod;
 
     // remainderPurchaser and remainderTokens info saved in the contract
     // used for reference for contract owner to send refund if any to last purchaser after end of crowdsale
@@ -342,6 +344,7 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
         rewardWallet = _rewardWallet;
         nonVestedWallet = _nonVestedWallet;
         liquirityPercent = _liquidityPercent;
+        earlyCorwdsalePeriod = startTime.add(1 hours);
         super.pause();
 
     }
@@ -376,7 +379,7 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
     onlyOwner
     {
         require(now < startTime && investorsAddress != address(0));
-        require(token.getTotalSupply().add(tokensPurchased) <= PRE_CROWDSALE_CAP);
+        require(token.getTotalSupply().add(tokensPurchased) <= PRESALE_CAP);
 
         token.mint(investorsAddress, tokensPurchased);
         emit PrivateInvestorTokenPurchase(investorsAddress, tokensPurchased);
@@ -415,20 +418,24 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
     {
         require(beneficiary != address(0));
         require(msg.sender == beneficiary);
-        require(validPurchase() && token.getTotalSupply() < TOTAL_TOKENS_FOR_CROWDSALE);
+        require(validPurchase() && token.getTotalSupply() < TOTAL_TOKENS_FOR_TOKENSALE);
 
         uint256 weiAmount = msg.value;
 
         // calculate token amount to be created
         uint256 tokens = weiAmount.mul(rate);
 
-        require(trackBuyersPurchases[msg.sender].add(tokens) <= PERSONAL_CAP);
+        if (now < earlyCorwdsalePeriod) {
+            require(trackBuyersPurchases[msg.sender].add(tokens) <= INDIVIDUAL_CAP);
+        }
+
+        require(trackBuyersPurchases[msg.sender].add(tokens) <= INDIVIDUAL_CAP);
 
         trackBuyersPurchases[beneficiary] = trackBuyersPurchases[beneficiary].add(tokens);
 
         //remainder logic
-        if (token.getTotalSupply().add(tokens) > TOTAL_TOKENS_FOR_CROWDSALE) {
-            tokens = TOTAL_TOKENS_FOR_CROWDSALE.sub(token.getTotalSupply());
+        if (token.getTotalSupply().add(tokens) > TOTAL_TOKENS_FOR_TOKENSALE) {
+            tokens = TOTAL_TOKENS_FOR_TOKENSALE.sub(token.getTotalSupply());
             weiAmount = tokens.div(rate);
 
             // save info so as to refund purchaser after crowdsale's end
@@ -457,7 +464,7 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
     // overriding Crowdsale#hasEnded to add cap logic
     // @return true if crowdsale event has ended
     function hasEnded() public view returns (bool) {
-        if (token.getTotalSupply() == TOTAL_TOKENS_FOR_CROWDSALE) {
+        if (token.getTotalSupply() == TOTAL_TOKENS_FOR_TOKENSALE) {
             return true;
         }
 
@@ -472,13 +479,14 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
         require(address(swapper) != address(0x0));
 
         // final minting
-        token.mint(teamAndAdvisorsAllocation, VESTED_TEAM_ADVISORS_SHARE);
-        token.mint(nonVestedWallet, NON_VESTED_TEAM_ADVISORS_SHARE);
-        token.mint(address(swapper), UNISWAPPER_SHARE);
+        token.mint(teamAndAdvisorsAllocation, LOCKED_SHARE);
+        token.mint(nonVestedWallet, UNLOCKED_SHARE);
+        token.mint(nonVestedWallet, COMPANY_SHARE);
+        token.mint(address(swapper), UNISWAP_SHARE);
         token.mint(rewardWallet, REWARD_SHARE);
 
-        if (TOTAL_TOKENS_SUPPLY > token.getTotalSupply()) {
-            uint256 remainingTokens = TOTAL_TOKENS_SUPPLY.sub(token.getTotalSupply());
+        if (TOTAL_SUPPLY > token.getTotalSupply()) {
+            uint256 remainingTokens = TOTAL_SUPPLY.sub(token.getTotalSupply());
 
             token.mint(address(wallet), remainingTokens);
         }
