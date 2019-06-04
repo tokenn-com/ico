@@ -15,7 +15,7 @@ interface List {
 }
 
 interface Swapper {
-    function lock() external;
+    function lock(uint _uniswapShare, uint _crowdsaleCap, uint _liqudityPercent) external;
 }
 
 // File: zeppelin-solidity/contracts/ownership/Ownable.sol
@@ -283,10 +283,10 @@ contract FinalizableCrowdsale is Crowdsale, Ownable {
 contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
     uint256 constant public REWARD_SHARE    =                 100e18;
     uint256 constant public UNISWAP_SHARE   =                 500e18;
-    uint256 constant public UNLOCKED_SHARE  =                 200e18;
+    uint256 constant public UNLOCKED_SHARE  =                 300e18;
     uint256 constant public LOCKED_SHARE    =                 300e18;
     uint256 constant public PRESALE_CAP     =                 200e18;
-    uint256 constant public CROWDSALE_CAP   =                 1000e18;
+    uint256 constant public CROWDSALE_CAP   =                 2000e18;
     uint256 constant public TOTAL_SUPPLY    =                 2500e18;
     uint256 constant public INDIVIDUAL_CAP  =                 2e18;
     uint256 constant public COMPANY_SHARE   =                 200e18;
@@ -493,7 +493,7 @@ contract TokennCrowdsale is FinalizableCrowdsale, Pausable {
         token.finishMinting();
         Token(token).unpause();
         super.finalization();
-        swapper.lock();
+        swapper.lock(UNISWAP_SHARE, CROWDSALE_CAP, liquirityPercent);
 
     }
 }

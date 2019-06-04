@@ -130,16 +130,21 @@ contract Uniswapper is Ownable {
         rate = _rate;
     }
 
-    function lock() external {
+    function lock(uint _uniswapShare, uint _crowdsaleCap, uint _liqudityPercent) external {
         require(locked == false);
         require(token.balanceOf(address(this)) > 0);
         locked = true;
         unlockedAt = now.add(1 hours);
 
-        tokenSent = token.balanceOf(address(this)) / rate;
         ethSent = address(this).balance;
+
+        uint tokenPrice = 1 ether / rate;
+        uint a = ethSent.mul(_uniswapShare);
+        uint b = _crowdsaleCap.mul(tokenPrice).mul(_liqudityPercent).div(100);
+
+        tokenSent = a.div(b).mul(1 ether);
         token.approve(address(exchange), tokenSent);
-        liquidityMinted = exchange.addLiquidity.value(ethSent)(0, tokenSent, now + 1 hours);
+        liquidityMinted = exchange.addLiquidity.value(ethSent)(0, tokenSent, now.add(1 hours));
     }
 
     /**
@@ -149,7 +154,7 @@ contract Uniswapper is Ownable {
         assert(now >= unlockedAt);
         assert(unlocked == false);
         unlocked = true;
-        (ethRemoved, tokensRemoved) = exchange.removeLiquidity(liquidityMinted, 1, 1, now + 1 hours);
+        (ethRemoved, tokensRemoved) = exchange.removeLiquidity(liquidityMinted, 1, 1, now.add(1 hours));
         owner.transfer(ethRemoved);
         token.transfer(owner, tokensRemoved);
     }

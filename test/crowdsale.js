@@ -11,17 +11,18 @@ const TAA = artifacts.require('./TeamAndAdvisorsAllocation.sol');
 const Crowdsale = artifacts.require('./TokennCrowdsale.sol');
 
 contract('Crowdsale', async accounts => {
-    const day = 86400;
+    const minute = 60;
     const hour = 3600;
-    const crowdsalePeriod = 10 * day;
+    const day = 86400;
 
-    const start = parseInt(new Date().getTime() / 1000) + hour; // now + 1 hour for presale
-    const end = start + crowdsalePeriod;
-    const tokenBuyRate = 1;
-    const liquidityPercent = 20;
-
+    const crowdsalePeriod = hour;
+    const tokenBuyRate = 25;
     const rewardWallet = accounts[1];
     const nonVestedWallet = accounts[2];
+    const liquidityPercent = 20;
+
+    const earlyBuyerValue = web3.utils.toHex(80000000000000000);
+    const buyerValue =  web3.utils.toHex(2e18);
 
     let whitelist;
     let multisig;
@@ -32,10 +33,14 @@ contract('Crowdsale', async accounts => {
     let exchange;
 
     beforeEach(async () => {
+        const block = await web3.eth.getBlock("latest");
+
+        const start = block.timestamp + hour; // now + 1 hour for presale
+        const end = start + crowdsalePeriod;
+
         whitelist = await Whitelist.new();
         multisig = await MultiSig.new();
         exchange = await Exchange.new();
-
         crowdsale = await Crowdsale.new(start, end, whitelist.address, tokenBuyRate, multisig.address, rewardWallet, nonVestedWallet, liquidityPercent);
         token = await Token.new(crowdsale.address);
         swapper = await Swapper.new(token.address, exchange.address, tokenBuyRate);
@@ -49,52 +54,72 @@ contract('Crowdsale', async accounts => {
         await crowdsale.setTeamWalletAddress(taa.address);
     });
 
-    it('should pass everything', async () => {
-
-        // trying to buy tokens before crowdsale start
-        expectThrow(
-            crowdsale.sendTransaction({value: 50e18})
+    it("should revert buying tokens in pre crowdsale", async () => {
+        await expectThrow(
+            crowdsale.sendTransaction({value: buyerValue})
         );
+    });
 
-        // mint token for pre crowdsale buyer
-        await crowdsale.mintTokenForPreCrowdsale(accounts[5], 2);
-        const preMinted = await token.balanceOf.call(accounts[5]);
-        assert.equal(parseInt(preMinted), 2);
+    it("should mint tokens for pre crowdsale investors", async () => {
+        await crowdsale.mintTokenForPreCrowdsale(accounts[2], buyerValue);
+        const minted = await token.balanceOf.call(accounts[2]);
+        assert.equal(parseInt(minted), parseInt(buyerValue));
+    });
 
-        // starting crowdsale...
-        await timeTravel(hour);
-
-        //trying to mint precrowd tokens after start
-        expectThrow(
-            crowdsale.mintTokenForPreCrowdsale(accounts[2], 5000)
+    it("should throw minting tokens after crowdsale start time", async () => {
+        timeTravel(hour);
+        await expectThrow(
+            crowdsale.mintTokenForPreCrowdsale(accounts[2], buyerValue)
         );
+    });
 
-        //unpause crowdsale
+    it("should throw early tokens with big amount", async () => {
+        timeTravel(hour);
         await crowdsale.unpause();
+        await expectThrow(
+            crowdsale.sendTransaction({value: buyerValue})
+        );
+    });
 
-        // buying tokens...
-        await crowdsale.sendTransaction({value: 1e18});
-        await crowdsale.sendTransaction({from: accounts[1], value: 1e18});
-        await crowdsale.sendTransaction({from: accounts[2], value: 1e18});
+    it("should buy early tokens", async () => {
+        timeTravel(hour);
+        await crowdsale.unpause();
+        await crowdsale.sendTransaction({value: earlyBuyerValue});
+        const bought = await token.balanceOf(accounts[0]);
+        assert.equal(parseInt(bought), parseInt(earlyBuyerValue) * tokenBuyRate);
+    });
 
-        assert.equal(parseInt(await token.getTotalSupply.call()), 3e18);
+    it("should by big token amount after early period eneded", async () => {
+        timeTravel(hour);
+        await crowdsale.unpause();
+        timeTravel(10 * minute);
+        crowdsale.sendTransaction({from: accounts[1], value: buyerValue});
+        const bought = await token.balanceOf(accounts[1]);
+        assert.equal(parseInt(bought), parseInt(buyerValue) * tokenBuyRate);
+    });
 
-        // ending crowdsale with sending tokens and ether to uniswap exchange
-        await timeTravel(end + 600);
+    it("should finalize crowdsale", async () => {
+        await crowdsale.unpause();
+        timeTravel(hour);
+        timeTravel(10 * minute);
+        await crowdsale.sendTransaction({value: buyerValue * 5});
+        timeTravel(hour);
         await crowdsale.finalize();
+        console.log(parseInt(await swapper.ethSent.call()));
+        console.log(parseInt(await swapper.tokenSent.call()));
+        console.log(parseInt(await token.balanceOf(swapper.address)));
+    });
 
-        const ethSent = await swapper.ethSent();
-        const tokensSent = await swapper.tokenSent();
-
-        // unlocking liquidity after certain period of time
-        await timeTravel(3600);
+    it("should unlock liquidity", async () => {
+        await crowdsale.unpause();
+        timeTravel(hour);
+        timeTravel(10 * minute);
+        await crowdsale.sendTransaction({value: buyerValue * 5});
+        timeTravel(hour);
+        await crowdsale.finalize();
+        timeTravel(hour);
         await swapper.unlock();
-
-        const ethRemoved = await swapper.ethRemoved();
-        const tokensRemoved = await swapper.tokensRemoved();
-
-        assert.equal(parseInt(ethSent), parseInt(ethRemoved));
-        assert.equal(parseInt(tokensSent), parseInt(tokensRemoved));
-
+        console.log(parseInt(await swapper.ethRemoved.call()));
+        console.log(parseInt(await swapper.tokensRemoved.call()));
     });
 });
